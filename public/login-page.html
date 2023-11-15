@@ -7,21 +7,102 @@
 </head>
 <body>
     <div class="main">
-        <div class="loginForm">
+        <div class="loginForm" id="loginForm" style="display: block;">
+            <h1>Login</h1>
             <form>
-                <label for="username">Username:</label>
-                <input type="text" name="username">
+                <label for="username">Name:</label>
+                <input id="loginUsername" type="text" name="loginUsername">
                 <br>
-                <label for="password">Password:</label>
-                <input type="password" name="password">
+                <label for="loginPassword">Password:</label>
+                <input id="loginPassword" type="password" name="loginPassword">
                 <br><br>
-                <button>Login</button>
             </form>
-            <div class="buttons">
+            <div class="loginButtons">
               <button>Login</button>
-              <button>Create Account</button>
+              <button onclick="showforms('createForm','loginForm')">Create Account</button>
+            </div>
+        </div> 
+        <div class="createForm" id="createForm" style="display: none;">
+            <h1>Create account</h1>
+            <form>
+                <label for="createUsername">Name:</label>
+                <input id="createUsername" type="text" name="createUsername" required>
+                <br>
+                <label for="createPassword">Password:</label>
+                <input id="createPassword" type="password" name="createPassword"required>
+                <br>
+                <label for="parentsInput">Parents Name:</label>
+                <input id="parentsInput" type="text" name="parentsInput"required>
+                <br>
+                <label for="userOption">Select user type:</label>
+                <select id="userOption" name="userOption">
+                    <option value="Medlem">Medlem</option>
+                    <option value="Leder">Leder</option>
+                </select>      
+                <br>
+                <label for="roleOption">Select your role:</label>
+                <select id="roleOption" name="roleOption">
+                    <option value="Tamburmajor">Tamburmajor</option>
+                    <option value="Trommeslager">Trommeslager</option>
+                    <option value="Korpsfanebærer">Korpsfanebærer </option>
+                    <option value="Korpssjef">Korpssjef</option>
+                    <option value="Medlemmer">Medlemmer</option>
+                </select>
+                <br> 
+                <label for="komaniOption">Select an kompani:</label>
+                <select id="komaniOption" name="komaniOption">
+                </select>    
+            </form>
+            <div class="createButtons">
+              <button onclick="showforms('loginForm','createForm')" id="createButton">Create Account</button>
+              <button onclick="showforms('loginForm','createForm')">Login</button>
             </div>
         </div> 
     </div>
+    <script>
+        function showforms(show, hide){
+            document.getElementById(show).style.display = "block"
+            document.getElementById(hide).style.display = "none"
+        }
+         document.getElementById('createButton').addEventListener('click', async function(event) {
+            event.preventDefault();
+            
+
+            const creatUser = {
+                name: document.getElementById('createUsername').value,
+                password: document.getElementById('createPassword').value,
+                parents: document.getElementById('parentsInput').value,
+                userType: document.getElementById('userOption').value,
+                role: document.getElementById('roleOption').value,
+                kompani: document.getElementById('komaniOption').value,
+            };
+
+            const requestOptions = {
+                 method: 'POST',
+                 headers: { 'Content-Type': 'application/json' },
+                 body: JSON.stringify(creatUser)
+            };
+            const form = document.getElementById('form');
+
+            for (const element of form.elements) {
+               element.value = '';
+            }
+            const response = await fetch('/createUser', requestOptions);
+            const data = await response.json();
+        })    
+
+        async function getKompani(){
+            let response = await fetch('/getKompani')
+            let kompanis = await response.json()
+            let kompaniTable = document.getElementById("komaniOption");
+            kompanis.forEach(kompani => {
+                let option = document.createElement("option");
+                option.value = kompani.kompani;
+                option.textContent = kompani.kompani;
+                kompaniTable.appendChild(option);
+            });
+        }
+        getKompani();
+    </script>
 </body>
 </html>

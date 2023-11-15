@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+    <h2>Admin page</h2>
+    <div class="main">
+        <div class="showUsers">
+            <h2>Show Users</h2>
+            <table id="usersTable">
+                <p>Filter</p>
+                <div class="filters">
+                    <select name="filterRole" id="filterRole">
+                        <option value="Everyone">Everyone</option>
+                    </select>
+                    <select name="FilterKompani" id="FilterKompani">
+                        <option value="Everyone">Everyone</option>
+                    </select>
+                </div>
+                 
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Parents Name</th>
+                        <th>User Type</th>
+                        <th>Role</th>
+                        <th>Kompani</th>
+                        <th>User Status</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+        <div class="addKompani">
+             <h3>Add Kompani</h3>
+            <form >
+                <label for="addKompanis">Name:</label>
+                <input id="addKompanis" type="text" name="addKompanis" required>
+            </form>
+            <br>
+            <button id="addKompaniButton">Add Kompani</button>
+
+        </div>
+    </div>
+    <script>
+        async function getUserAdmin(){
+            let response = await fetch('/getUsersAdmin')
+            let users = await response.json()
+            let usersTable = document.getElementById("usersTable")
+            users.forEach(user => {
+                let row = usersTable.insertRow();
+                row.insertCell().textContent = user.name;
+                row.insertCell().textContent = user.parents;
+                row.insertCell().textContent = user.userType;
+                row.insertCell().textContent = user.role;
+                row.insertCell().textContent = user.kompani;
+                row.insertCell().textContent = user.userstatus;
+                let activateButton = document.createElement("button");
+                activateButton.id = "activateButton"
+                activateButton.textContent = "Activate";
+                activateButton.value = user.name;
+                row.insertCell().appendChild(activateButton);
+                let deleteButton = document.createElement("button");
+                deleteButton.id = "deleteButton"
+                deleteButton.textContent = "Delete";
+                deleteButton.value = user.name;
+                row.insertCell().appendChild(deleteButton);
+
+
+                deleteButton.addEventListener('click', showDelete(user.name))
+                activateButton.addEventListener('click', showActivate(user.name))
+            });
+        }
+
+        function showDelete(userName) {
+            return async function(event) {
+               event.preventDefault();
+               const DeleteUser = {
+                 name: userName
+                };
+
+                const requestOptions = {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(DeleteUser)
+                };
+                 const response = await fetch('/deleteUser', requestOptions);
+                 const data = await response.json();
+            }
+        };
+        
+        function showActivate(userName) {
+            return async function(event) {
+               event.preventDefault();
+               const activateUser = {
+                 name: userName
+                };
+
+                const requestOptions = {
+                  method: 'PUT',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(activateUser)
+                };
+                 const response = await fetch('/activateUser', requestOptions);
+                 const data = await response.json();
+            }
+        };
+
+        getUserAdmin()
+    </script>
+</body>
+</html>
