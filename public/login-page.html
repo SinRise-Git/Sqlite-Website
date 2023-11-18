@@ -54,7 +54,7 @@
                 </select>    
             </form>
             <div class="createButtons">
-              <button onclick="showforms('loginForm','createForm')" id="createButton">Create Account</button>
+              <button onclick="refershPage()" id="createButton">Create Account</button>
               <button onclick="showforms('loginForm','createForm')">Login</button>
             </div>
         </div> 
@@ -64,10 +64,13 @@
             document.getElementById(show).style.display = "block"
             document.getElementById(hide).style.display = "none"
         }
-         document.getElementById('createButton').addEventListener('click', async function(event) {
+
+        function refershPage(){
+            window.location.href = "/login-page.html";
+        }
+        document.getElementById('createButton').addEventListener('click', async function(event) {
             event.preventDefault();
             
-
             const creatUser = {
                 name: document.getElementById('createUsername').value,
                 password: document.getElementById('createPassword').value,
@@ -82,14 +85,9 @@
                  headers: { 'Content-Type': 'application/json' },
                  body: JSON.stringify(creatUser)
             };
-            const form = document.getElementById('form');
-
-            for (const element of form.elements) {
-               element.value = '';
-            }
             const response = await fetch('/createUser', requestOptions);
             const data = await response.json();
-        })    
+        })      
 
         async function getKompani(){
             let response = await fetch('/getKompani')

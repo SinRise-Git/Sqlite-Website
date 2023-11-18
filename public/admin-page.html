@@ -12,16 +12,28 @@
         <div class="showUsers">
             <h2>Show Users</h2>
             <table id="usersTable">
-                <p>Filter</p>
                 <div class="filters">
-                    <select name="filterRole" id="filterRole">
-                        <option value="Everyone">Everyone</option>
+                    <label for="filterRole">Filter Role:</label>
+                    <select name="filterRole" id="filterRole" onchange="getUserAdmin()">
+                        <option value="All">All</option>
+                        <option value="Tamburmajor">Tamburmajor</option>
+                        <option value="Trommeslager">Trommeslager</option>
+                        <option value="Korpsfanebærer">Korpsfanebærer </option>
+                        <option value="Korpssjef">Korpssjef</option>
+                        <option value="Medlemmer">Medlemmer</option>
                     </select>
-                    <select name="FilterKompani" id="FilterKompani">
-                        <option value="Everyone">Everyone</option>
+                    <label for="filterKompani">Filter Kompani:</label>
+                    <select name="filterKompani" id="filterKompani" onchange="getUserAdmin()">
+                        <option value="All">All</option>
                     </select>
+                    <label for="filterUserstatus">Filter Userstatus:</label>
+                    <select name="filterUserstatus" id="filterUserstatus" onchange="getUserAdmin()">
+                        <option value="All">All</option>
+                        <option value="True">True</option>
+                        <option value="False">False</option>
+                    </select>
+                    
                 </div>
-                 
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -42,50 +54,84 @@
             </form>
             <br>
             <button id="addKompaniButton">Add Kompani</button>
-
+            <table id="kompaniTable">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                    </tr>
+                </thead>
+            </table>
         </div>
     </div>
     <script>
-        async function getUserAdmin(){
+        document.getElementById('addKompaniButton').addEventListener('click', async function(event) {
+            event.preventDefault();
+            const creatKompani = {
+                newKompani: document.getElementById('addKompanis').value
+            };
+
+            const requestOptions = {
+                 method: 'POST',
+                 headers: { 'Content-Type': 'application/json' },
+                 body: JSON.stringify(creatKompani)
+            };
+           
+            const response = await fetch('/createKompani', requestOptions);
+            const data = await response.json();
+        })    
+
+        async function getUserAdmin() {
+            let selectedRole = document.getElementById("filterRole").value;
+            let selectedKompani = document.getElementById("filterKompani").value;
+            let selectedUserstatus = document.getElementById("filterUserstatus").value;
+
             let response = await fetch('/getUsersAdmin')
             let users = await response.json()
             let usersTable = document.getElementById("usersTable")
+
+            while (usersTable.rows.length > 1) {
+                usersTable.deleteRow(1);
+            }
+
             users.forEach(user => {
-                let row = usersTable.insertRow();
-                row.insertCell().textContent = user.name;
-                row.insertCell().textContent = user.parents;
-                row.insertCell().textContent = user.userType;
-                row.insertCell().textContent = user.role;
-                row.insertCell().textContent = user.kompani;
-                row.insertCell().textContent = user.userstatus;
-                let activateButton = document.createElement("button");
-                activateButton.id = "activateButton"
-                activateButton.textContent = "Activate";
-                activateButton.value = user.name;
-                row.insertCell().appendChild(activateButton);
-                let deleteButton = document.createElement("button");
-                deleteButton.id = "deleteButton"
-                deleteButton.textContent = "Delete";
-                deleteButton.value = user.name;
-                row.insertCell().appendChild(deleteButton);
-
-
-                deleteButton.addEventListener('click', showDelete(user.name))
-                activateButton.addEventListener('click', showActivate(user.name))
-            });
+                if ((selectedRole === "All" || user.role === selectedRole) &&
+                    (selectedKompani === "All" || user.kompani === selectedKompani) && 
+                    (selectedUserstatus === "All" || user.userstatus === selectedUserstatus)
+                    ){
+                    let row = usersTable.insertRow();
+                    row.insertCell().textContent = user.name;
+                    row.insertCell().textContent = user.parents;
+                    row.insertCell().textContent = user.userType;
+                    row.insertCell().textContent = user.role;
+                    row.insertCell().textContent = user.kompani;
+                    row.insertCell().textContent = user.userstatus;
+                    let activateButton = document.createElement("button");
+                    activateButton.id = "activateButton"
+                    activateButton.textContent = "Activate";
+                    activateButton.value = user.name;
+                    row.insertCell().appendChild(activateButton);
+                    let deleteButton = document.createElement("button");
+                    deleteButton.id = "deleteButton"
+                    deleteButton.textContent = "Delete";
+                    deleteButton.value = user.name;
+                    row.insertCell().appendChild(deleteButton);
+                    deleteButton.addEventListener('click', showDelete(user.name))
+                    activateButton.addEventListener('click', showActivate(user.name))
         }
+    });
+}
 
         function showDelete(userName) {
             return async function(event) {
                event.preventDefault();
-               const DeleteUser = {
+               const deleteUser = {
                  name: userName
                 };
 
                 const requestOptions = {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify(DeleteUser)
+                  body: JSON.stringify(deleteUser)
                 };
                  const response = await fetch('/deleteUser', requestOptions);
                  const data = await response.json();
@@ -108,7 +154,52 @@
                  const data = await response.json();
             }
         };
+        async function getKompani(){
+            let response = await fetch('/getKompani')
+            let kompanis = await response.json()
+            let usersTable = document.getElementById("kompaniTable")
+            kompanis.forEach(kompani => {
+              let row = usersTable.insertRow()
+              row.insertCell().textContent = kompani.kompani;
+              let deleteButton = document.createElement("button");
+              deleteButton.id = "deleteButtonKompani"
+              deleteButton.textContent = "Delete";
+              deleteButton.value = kompani.kompani;
+              row.insertCell().appendChild(deleteButton);
 
+              deleteButton.addEventListener('click', kompaniDelete(kompani.kompani))
+            
+            });
+        }
+        function kompaniDelete(kompani) {
+            return async function(event) {
+               event.preventDefault();
+               const deleteKompani = {
+                 kompani: kompani
+                };
+
+                const requestOptions = {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(deleteKompani)
+                };
+                 const response = await fetch('/deleteKompani', requestOptions);
+                 const data = await response.json();
+            }
+        };
+        async function getKompaniFiler(){
+            let response = await fetch('/getKompani')
+            let kompanis = await response.json()
+            let kompaniTable = document.getElementById("filterKompani");
+            kompanis.forEach(kompani => {
+                let option = document.createElement("option");
+                option.value = kompani.kompani;
+                option.textContent = kompani.kompani;
+                kompaniTable.appendChild(option);
+            });
+        }
+        getKompaniFiler()
+        getKompani()
         getUserAdmin()
     </script>
 </body>

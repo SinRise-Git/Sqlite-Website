@@ -25,6 +25,17 @@ function usableUser(name){
     const info = sql.run("True" , name)
 }
 
+function addKompani(newKompani){
+    const sql = db.prepare("INSERT INTO kompanier (kompani) values (?)")
+    const info = sql.run(newKompani)
+}
+
+function removeKompanis(removeKompanis){ 
+    const sql = db.prepare("DELETE FROM kompanier WHERE kompani = ?");
+    const info = sql.run(removeKompanis)
+    
+}
+
 app.post("/createUser", createUsers);
 
 app.get("/getKompani", getKompanis);
@@ -35,6 +46,19 @@ app.post("/deleteUser", deleteUsers)
 
 app.put("/activateUser", activateUsers)
 
+app.post("/createKompani", createKompanis)
+
+app.post("/deleteKompani", deleteKompanis)
+
+async function deleteKompanis(request, response) {
+    const user = request.body
+    removeKompanis(user.kompani)
+}
+
+async function createKompanis(request){
+    const user = request.body
+    addKompani(user.newKompani)
+}
 
 async function activateUsers(request){
     const user = request.body

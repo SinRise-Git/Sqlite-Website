@@ -1,12 +1,12 @@
-.showUsers tr {
+.showUsers tr, #kompaniTable tr {
     text-align: center;
 }
 
-.showUsers th {
+.showUsers th, #kompaniTable th {
     padding: 10px 10px 10px 10px;
 }
 
-.showUsers button{
+.showUsers button, #kompaniTable button{
     padding: 5px 7px 5px 7px;
 }
 
@@ -14,13 +14,12 @@
     margin-left: 10px
 }
 
-h2 {
-    font-size: 40px;
-    margin-left: 10px
+.showUsers, label {
+    margin-left: 10px;
 }
 
-.showUsers p {
-    font-weight: bolder;
+h2 {
+    font-size: 40px;
     margin-left: 10px
 }
 
