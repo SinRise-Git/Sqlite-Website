@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <link rel="stylesheet" href="./css/style.css">
 </head>
 <body>
     <div class="main">
@@ -18,9 +19,10 @@
                 <br><br>
             </form>
             <div class="loginButtons">
-              <button>Login</button>
+              <button id="loginButton">Login</button>
               <button onclick="showforms('createForm','loginForm')">Create Account</button>
             </div>
+            <p id="errorMessageLogin"></p>
         </div> 
         <div class="createForm" id="createForm" style="display: none;">
             <h1>Create account</h1>
@@ -54,9 +56,10 @@
                 </select>    
             </form>
             <div class="createButtons">
-              <button onclick="refershPage()" id="createButton">Create Account</button>
+              <button id="createButton">Create Account</button>
               <button onclick="showforms('loginForm','createForm')">Login</button>
             </div>
+            <p id="errorMessageCreate"></p>
         </div> 
     </div>
     <script>
@@ -64,10 +67,40 @@
             document.getElementById(show).style.display = "block"
             document.getElementById(hide).style.display = "none"
         }
+        document.getElementById('loginButton').addEventListener('click', async function(event) {
+            event.preventDefault();
+            
+            const loginUser = {
+                name: document.getElementById('loginUsername').value,
+                password: document.getElementById('loginPassword').value,
+            };
 
-        function refershPage(){
-            window.location.href = "/login-page.html";
+            const requestOptions = {
+                 method: 'POST',
+                 headers: { 'Content-Type': 'application/json' },
+                 body: JSON.stringify(loginUser)
+            };
+            const response = await fetch('/loginUser', requestOptions);
+            const data = await response.json();
+            if (data.redirectUrl) {
+               window.location.href = data.redirectUrl;
+            } else {
+                document.getElementById('errorMessageLogin').innerText = data.ErrorMessage
+            }
+        })      
+
+        async function getKompani(){
+            let response = await fetch('/getKompani')
+            let kompanis = await response.json()
+            let kompaniTable = document.getElementById("komaniOption");
+            kompanis.forEach(kompani => {
+                let option = document.createElement("option");
+                option.value = kompani.kompani;
+                option.textContent = kompani.kompani;
+                kompaniTable.appendChild(option);
+            });
         }
+        
         document.getElementById('createButton').addEventListener('click', async function(event) {
             event.preventDefault();
             
@@ -87,6 +120,13 @@
             };
             const response = await fetch('/createUser', requestOptions);
             const data = await response.json();
+            if (data.redirectUrl) {
+               window.location.href = data.redirectUrl;
+            } else {
+                document.getElementById('errorMessageCreate').innerText = data.ErrorMessage
+            }
+        
+
         })      
 
         async function getKompani(){

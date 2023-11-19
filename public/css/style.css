@@ -34,3 +34,7 @@ h2 {
 h3{
     font-size: 40px;
 }
+
+.loginForm p, .createForm p{
+    color: red;
+}
