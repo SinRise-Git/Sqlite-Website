@@ -21,6 +21,7 @@
             <div class="loginButtons">
               <button id="loginButton">Login</button>
               <button onclick="showforms('createForm','loginForm')">Create Account</button>
+              <button id="checkSession">Check Session</button>
             </div>
             <p id="errorMessageLogin"></p>
         </div> 
@@ -32,6 +33,9 @@
                 <br>
                 <label for="createPassword">Password:</label>
                 <input id="createPassword" type="password" name="createPassword"required>
+                <br>
+                <label for="createTelephone">Telephone:</label>
+                <input id="createTelephone" type="tel" name="createTelephone"required>
                 <br>
                 <label for="parentsInput">Parents Name:</label>
                 <input id="parentsInput" type="text" name="parentsInput"required>
@@ -67,6 +71,11 @@
             document.getElementById(show).style.display = "block"
             document.getElementById(hide).style.display = "none"
         }
+        document.getElementById('checkSession').addEventListener('click', async function(event) {
+            event.preventDefault();
+            let response = await fetch('/getSession')
+        })      
+
         document.getElementById('loginButton').addEventListener('click', async function(event) {
             event.preventDefault();
             
@@ -107,6 +116,7 @@
             const creatUser = {
                 name: document.getElementById('createUsername').value,
                 password: document.getElementById('createPassword').value,
+                telephone: document.getElementById('createTelephone').value,
                 parents: document.getElementById('parentsInput').value,
                 userType: document.getElementById('userOption').value,
                 role: document.getElementById('roleOption').value,

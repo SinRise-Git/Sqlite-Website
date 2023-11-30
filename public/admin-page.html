@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Admin</title>
     <link rel="stylesheet" href="./css/style.css">
 </head>
 <body>
@@ -32,12 +32,18 @@
                         <option value="True">True</option>
                         <option value="False">False</option>
                     </select>
-                    
+                    <label for="filterUsertype">Filter Usertype:</label>
+                    <select name="filterUsertype" id="filterUsertype" onchange="getUserAdmin()">
+                        <option value="All">All</option>
+                        <option value="Medlem">Medlem</option>
+                        <option value="Leder">Leder</option>
+                    </select>  
                 </div>
                 <thead>
                     <tr>
                         <th>Name</th>
                         <th>Parents Name</th>
+                        <th>Telephone</th>
                         <th>User Type</th>
                         <th>Role</th>
                         <th>Kompani</th>
@@ -62,8 +68,12 @@
                 </thead>
             </table>
         </div>
+        <button onclick="checkLoginAdmin()">Check Session</button>
     </div>
     <script>
+        async function checkLoginAdmin(){
+           let response = await fetch('/checkLoginAdmin')
+        }
         document.getElementById('addKompaniButton').addEventListener('click', async function(event) {
             event.preventDefault();
             const creatKompani = {
@@ -84,6 +94,7 @@
             let selectedRole = document.getElementById("filterRole").value;
             let selectedKompani = document.getElementById("filterKompani").value;
             let selectedUserstatus = document.getElementById("filterUserstatus").value;
+            let selectedUsertype = document.getElementById("filterUsertype").value;
 
             let response = await fetch('/getUsersAdmin')
             let users = await response.json()
@@ -96,11 +107,13 @@
             users.forEach(user => {
                 if ((selectedRole === "All" || user.role === selectedRole) &&
                     (selectedKompani === "All" || user.kompani === selectedKompani) && 
-                    (selectedUserstatus === "All" || user.userstatus === selectedUserstatus)
+                    (selectedUserstatus === "All" || user.userstatus === selectedUserstatus) &&
+                    (selectedUsertype === "All" || user.userType === selectedUsertype) 
                     ){
                     let row = usersTable.insertRow();
                     row.insertCell().textContent = user.name;
                     row.insertCell().textContent = user.parents;
+                    row.insertCell().textContent = user.telephone;
                     row.insertCell().textContent = user.userType;
                     row.insertCell().textContent = user.role;
                     row.insertCell().textContent = user.kompani;
@@ -117,10 +130,9 @@
                     row.insertCell().appendChild(deleteButton);
                     deleteButton.addEventListener('click', showDelete(user.name))
                     activateButton.addEventListener('click', showActivate(user.name))
+                }
+            });
         }
-    });
-}
-
         function showDelete(userName) {
             return async function(event) {
                event.preventDefault();

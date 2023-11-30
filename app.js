@@ -1,7 +1,12 @@
-const express = require("express");
-const path = require("path");
+const express = require("express")
+const path = require("path")
 const sqlite3 = require('better-sqlite3')
 const bcrypt = require('bcrypt')
+const dotenv = require('dotenv')
+const session = require("express-session")
+const uuid = require('uuid')    
+
+dotenv.config();
 
 const app = express();
 const staticPath = path.join(__dirname, 'public')
@@ -10,9 +15,15 @@ app.use(express.static(staticPath));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-function insertUser(name, password, parents, userType, role, kompani) {
-    const sql = db.prepare("INSERT INTO users (name, password, parents, userType, role, kompani, userStatus) values (?, ?, ?, ?, ?, ?, ?)")
-    const info = sql.run(name, password, parents, userType, role, kompani, "False")
+app.use(session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false
+}))
+
+function insertUser(name, password, parents, userType, role, kompani, telephone, uuid) {
+    const sql = db.prepare("INSERT INTO users (name, password, parents, userType, role, kompani, userStatus, uuid, telefon) values (?, ?, ?, ?, ?, ?, ?, ?, ?)")
+    const info = sql.run(name, password, parents, userType, role, kompani, "False", uuid, telephone)
 }
 
 function removeUser(name){
@@ -32,8 +43,7 @@ function addKompani(newKompani){
 
 function removeKompanis(removeKompanis){ 
     const sql = db.prepare("DELETE FROM kompanier WHERE kompani = ?");
-    const info = sql.run(removeKompanis)
-    
+    const info = sql.run(removeKompanis)    
 }
 
 app.post("/createUser", createUsers);
@@ -52,34 +62,61 @@ app.post("/deleteKompani", deleteKompanis)
 
 app.post("/loginUser", loginUsers)
 
+app.get("/getSession" , getSessions)
+
+app.get("/checkLoginAdmin", checkLoginAdmin)
+
+
 async function loginUsers(request, response) {
     const user = request.body;
-    const sqlUserType = db.prepare('SELECT userType, password, userStatus FROM users WHERE name = ?');
+    const sqlUserType = db.prepare('SELECT userType, kompani, password, userStatus FROM users WHERE name = ?');
     let rows = sqlUserType.all(user.name);
 
     if (rows.length === 0) {
+        request.session.loggedIn = undefined
         response.send({
-            ErrorMessage: `Invalid name or password`
+            ErrorMessage: `Invalid name or password` 
+            
         });
+        
     } else {
         const storedUser = rows[0];
         if (storedUser.userStatus !== 'True') {
+            request.session.loggedIn = undefined
             response.send({
                 ErrorMessage: `Account is not activated yet. Ask the kompani leader to activate it.`
             });
+          
         } else {
             bcrypt.compare(user.password, storedUser.password, function (err, result) {
                 if (result) {
-                    response.send({ redirectUrl: `/${storedUser.userType.toLowerCase()}-page.html` });
+                    request.session.loggedIn = storedUser.userType;
+                    response.send({ 
+                        redirectUrl: `/${storedUser.userType.toLowerCase()}-page.html`
+                    });
                 } else {
+                    request.session.loggedIn = undefined
                     response.send({
-                        ErrorMessage: `Invalid name or password`
+                        ErrorMessage: `Invalid name or password`,          
                     });
                 }
             });
         }
     }
 }
+
+async function getSessions(request, response){
+    console.log(request.session.loggedIn)
+}
+
+async function checkLoginAdmin (request, response){
+    if (request.session.loggedIn === undefined)   {
+        console.log("You are not ment to be here")
+    } else {
+        console.log("You can be here")
+    }
+}
+
 async function deleteKompanis(request, response) {
     const user = request.body
     removeKompanis(user.kompani)
@@ -100,11 +137,12 @@ async function deleteUsers(request){
     removeUser(user.name)
 }
 async function getUsersAdmins(request, response){
-    const sql = db.prepare("SELECT name, parents, userType, role, kompani, userStatus FROM users WHERE userType != 'Admin'");
+    const sql = db.prepare("SELECT name, parents, userType, role, kompani, userStatus, telefon FROM users WHERE userType != 'Admin'");
     let rows = sql.all();
     let users = rows.map(user => ({
         name: user.name,
         parents: user.parents,
+        telephone: user.telefon,
         userType: user.userType,
         role: user.role,
         kompani: user.kompani,
@@ -132,12 +170,13 @@ async function createUsers(request, response) {
         });
     } else {
         const hashPassword = bcrypt.hashSync(user.password, 10)
-        insertUser(user.name, hashPassword, user.parents, user.userType, user.role, user.kompani);
+        const UUID = uuid.v4();
+        insertUser(user.name, hashPassword, user.parents, user.userType, user.role, user.kompani, user.telephone, UUID);
         response.send({ redirectUrl: `/login-page.html` });
     }
     
 }
 
 app.listen(3000, () => {
-    console.log("Server is running on http://localhost:3000");
+    console.log("Server is running on http://localhost:3000/login-page.html");
 });
