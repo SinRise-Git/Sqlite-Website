@@ -21,9 +21,9 @@ app.use(session({
     saveUninitialized: false
 }))
 
-function insertUser(name, password, parents, userType, role, kompani, telephone, uuid) {
-    const sql = db.prepare("INSERT INTO users (name, password, parents, userType, role, kompani, userStatus, uuid, telefon) values (?, ?, ?, ?, ?, ?, ?, ?, ?)")
-    const info = sql.run(name, password, parents, userType, role, kompani, "False", uuid, telephone)
+function insertUser(name, password, userType, role, kompani, telephone, uuid, gender) {
+    const sql = db.prepare("INSERT INTO users (name, password, userType, role, kompani, userStatus, uuid, telefon, gender) values (?, ?, ?, ?, ?, ?, ?, ?, ?)")
+    const info = sql.run(name, password, userType, role, kompani, "False", uuid, telephone, gender)
 }
 
 function removeUser(name){
@@ -46,9 +46,11 @@ function removeKompanis(removeKompanis){
     const info = sql.run(removeKompanis)    
 }
 
-app.post("/createUser", createUsers);
+app.post("/createUser", createUsers)
 
-app.get("/getKompani", getKompanis);
+app.get("/getKompani", getKompanis)
+
+app.get("/getChild", getChilds)
 
 app.get("/getUsersAdmin", getUsersAdmins)
 
@@ -137,12 +139,12 @@ async function deleteUsers(request){
     removeUser(user.name)
 }
 async function getUsersAdmins(request, response){
-    const sql = db.prepare("SELECT name, parents, userType, role, kompani, userStatus, telefon FROM users WHERE userType != 'Admin'");
+    const sql = db.prepare("SELECT name, userType, role, kompani, userStatus, telefon, gender FROM users WHERE userType != 'Admin'");
     let rows = sql.all();
     let users = rows.map(user => ({
         name: user.name,
-        parents: user.parents,
         telephone: user.telefon,
+        gender: user.gender,
         userType: user.userType,
         role: user.role,
         kompani: user.kompani,
@@ -152,12 +154,22 @@ async function getUsersAdmins(request, response){
 }
 
 async function getKompanis(request, response) {
-    const sql = db.prepare('SELECT kompani FROM kompanier');
+    const sql = db.prepare('SELECT ID, kompani FROM kompanier');
     let rows = sql.all();
     let kompanis = rows.map(kompani => ({
+        id: kompani.ID,
         kompani: kompani.kompani
     }));
     response.send(kompanis);
+}
+
+async function getChilds(request, response){
+    const sql = db.prepare("SELECT name FROM users WHERE userType = 'Medlem'");
+    let rows = sql.all();
+    let childs = rows.map(child => ({
+        child: child.name
+    }));
+    response.send(childs);
 }
 
 async function createUsers(request, response) {
@@ -171,7 +183,7 @@ async function createUsers(request, response) {
     } else {
         const hashPassword = bcrypt.hashSync(user.password, 10)
         const UUID = uuid.v4();
-        insertUser(user.name, hashPassword, user.parents, user.userType, user.role, user.kompani, user.telephone, UUID);
+        insertUser(user.name, hashPassword, user.userType, user.role, user.kompani, user.telephone, UUID, user.gender);
         response.send({ redirectUrl: `/login-page.html` });
     }
     

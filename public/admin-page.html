@@ -36,14 +36,15 @@
                     <select name="filterUsertype" id="filterUsertype" onchange="getUserAdmin()">
                         <option value="All">All</option>
                         <option value="Medlem">Medlem</option>
+                        <option value="Medlem">Foreldre</option>
                         <option value="Leder">Leder</option>
                     </select>  
                 </div>
                 <thead>
                     <tr>
                         <th>Name</th>
-                        <th>Parents Name</th>
                         <th>Telephone</th>
+                        <th>Gender</th>
                         <th>User Type</th>
                         <th>Role</th>
                         <th>Kompani</th>
@@ -112,8 +113,8 @@
                     ){
                     let row = usersTable.insertRow();
                     row.insertCell().textContent = user.name;
-                    row.insertCell().textContent = user.parents;
                     row.insertCell().textContent = user.telephone;
+                    row.insertCell().textContent = user.gender;
                     row.insertCell().textContent = user.userType;
                     row.insertCell().textContent = user.role;
                     row.insertCell().textContent = user.kompani;

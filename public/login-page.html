@@ -37,27 +37,39 @@
                 <label for="createTelephone">Telephone:</label>
                 <input id="createTelephone" type="tel" name="createTelephone"required>
                 <br>
-                <label for="parentsInput">Parents Name:</label>
-                <input id="parentsInput" type="text" name="parentsInput"required>
+                <label for="genderOption">Select a gender:</label>
+                <select id="genderOption" name="genderOption">
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                </select>   
                 <br>
                 <label for="userOption">Select user type:</label>
-                <select id="userOption" name="userOption">
+                <select id="userOption" name="userOption" onchange="showOptions()">
                     <option value="Medlem">Medlem</option>
+                    <option value="Foreldre">Foreldre</option>
                     <option value="Leder">Leder</option>
                 </select>      
                 <br>
-                <label for="roleOption">Select your role:</label>
-                <select id="roleOption" name="roleOption">
+                <div class="roleOptionDiv" id="roleOptionDiv" style="display: block;">
+                 <label for="roleOption">Select your role:</label>
+                  <select id="roleOption" name="roleOption">
                     <option value="Tamburmajor">Tamburmajor</option>
                     <option value="Trommeslager">Trommeslager</option>
                     <option value="Korpsfanebærer">Korpsfanebærer </option>
                     <option value="Korpssjef">Korpssjef</option>
                     <option value="Medlemmer">Medlemmer</option>
-                </select>
-                <br> 
-                <label for="komaniOption">Select an kompani:</label>
-                <select id="komaniOption" name="komaniOption">
-                </select>    
+                  </select>
+                </div>
+                <div class="komaniOptionDiv" id="komaniOptionDiv" style="display: block;"> 
+                 <label for="komaniOption">Select an kompani:</label>
+                  <select id="komaniOption" name="komaniOption">
+                  </select>    
+                </div>
+                <div class="childOptionDiv" id="childOptionDiv" style="display: none;"> 
+                    <label for="childOption">Select an child:</label>
+                     <select id="childOption" name="childOption">
+                     </select>    
+                </div>   
             </form>
             <div class="createButtons">
               <button id="createButton">Create Account</button>
@@ -71,6 +83,20 @@
             document.getElementById(show).style.display = "block"
             document.getElementById(hide).style.display = "none"
         }
+        function showOptions() {
+            user = document.getElementById("userOption").value
+            if (user == "Foreldre"){
+                document.getElementById("roleOptionDiv").style.display = "none"
+                document.getElementById("komaniOptionDiv").style.display = "none"
+                document.getElementById("childOptionDiv").style.display = "block"
+            }
+            else {
+                document.getElementById("roleOptionDiv").style.display = "block"
+                document.getElementById("komaniOptionDiv").style.display = "block"
+                document.getElementById("childOptionDiv").style.display = "none"
+            }
+        }
+
         document.getElementById('checkSession').addEventListener('click', async function(event) {
             event.preventDefault();
             let response = await fetch('/getSession')
@@ -104,29 +130,40 @@
             let kompaniTable = document.getElementById("komaniOption");
             kompanis.forEach(kompani => {
                 let option = document.createElement("option");
-                option.value = kompani.kompani;
+                option.value = kompani.id;
                 option.textContent = kompani.kompani;
                 kompaniTable.appendChild(option);
+            });
+        }
+        async function getChild(){
+            let response = await fetch('/getChild')
+            let childs = await response.json()
+            let childTable = document.getElementById("childOption");
+            childs.forEach(child => {
+                let option = document.createElement("option");
+                option.value = child.child;
+                option.textContent = child.child;
+                childTable.appendChild(option);
             });
         }
         
         document.getElementById('createButton').addEventListener('click', async function(event) {
             event.preventDefault();
             
-            const creatUser = {
+            const createUser = {
                 name: document.getElementById('createUsername').value,
                 password: document.getElementById('createPassword').value,
                 telephone: document.getElementById('createTelephone').value,
-                parents: document.getElementById('parentsInput').value,
                 userType: document.getElementById('userOption').value,
-                role: document.getElementById('roleOption').value,
-                kompani: document.getElementById('komaniOption').value,
+                role: document.getElementById('userOption').value === 'Foreldre' ? "Empty" : document.getElementById('roleOption').value,
+                kompani: document.getElementById('userOption').value === 'Foreldre' ? "Empty" : document.getElementById('komaniOption').value,
+                gender: document.getElementById('genderOption').value,
             };
 
             const requestOptions = {
                  method: 'POST',
                  headers: { 'Content-Type': 'application/json' },
-                 body: JSON.stringify(creatUser)
+                 body: JSON.stringify(createUser)
             };
             const response = await fetch('/createUser', requestOptions);
             const data = await response.json();
@@ -138,18 +175,7 @@
         
 
         })      
-
-        async function getKompani(){
-            let response = await fetch('/getKompani')
-            let kompanis = await response.json()
-            let kompaniTable = document.getElementById("komaniOption");
-            kompanis.forEach(kompani => {
-                let option = document.createElement("option");
-                option.value = kompani.kompani;
-                option.textContent = kompani.kompani;
-                kompaniTable.appendChild(option);
-            });
-        }
+        getChild();
         getKompani();
     </script>
 </body>
