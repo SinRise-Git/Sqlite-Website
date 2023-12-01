@@ -53,11 +53,6 @@
                 <div class="roleOptionDiv" id="roleOptionDiv" style="display: block;">
                  <label for="roleOption">Select your role:</label>
                   <select id="roleOption" name="roleOption">
-                    <option value="Tamburmajor">Tamburmajor</option>
-                    <option value="Trommeslager">Trommeslager</option>
-                    <option value="Korpsfanebærer">Korpsfanebærer </option>
-                    <option value="Korpssjef">Korpssjef</option>
-                    <option value="Medlemmer">Medlemmer</option>
                   </select>
                 </div>
                 <div class="komaniOptionDiv" id="komaniOptionDiv" style="display: block;"> 
@@ -122,7 +117,19 @@
             } else {
                 document.getElementById('errorMessageLogin').innerText = data.ErrorMessage
             }
-        })      
+        })   
+        
+        async function getRole(){
+            let response = await fetch('/getRole')
+            let roles = await response.json()
+            let roleTable = document.getElementById("roleOption");
+            roles.forEach(role => {
+                let option = document.createElement("option");
+                option.value = role.id;
+                option.textContent = role.role;
+                roleTable.appendChild(option);
+            });
+        }
 
         async function getKompani(){
             let response = await fetch('/getKompani')
@@ -155,8 +162,8 @@
                 password: document.getElementById('createPassword').value,
                 telephone: document.getElementById('createTelephone').value,
                 userType: document.getElementById('userOption').value,
-                role: document.getElementById('userOption').value === 'Foreldre' ? "Empty" : document.getElementById('roleOption').value,
-                kompani: document.getElementById('userOption').value === 'Foreldre' ? "Empty" : document.getElementById('komaniOption').value,
+                role: document.getElementById('userOption').value === 'Foreldre' ? "3" : document.getElementById('roleOption').value,
+                kompani: document.getElementById('userOption').value === 'Foreldre' ? "6" : document.getElementById('komaniOption').value,
                 gender: document.getElementById('genderOption').value,
             };
 
@@ -176,6 +183,7 @@
 
         })      
         getChild();
+        getRole();
         getKompani();
     </script>
 </body>

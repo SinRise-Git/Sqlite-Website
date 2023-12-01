@@ -48,6 +48,8 @@ function removeKompanis(removeKompanis){
 
 app.post("/createUser", createUsers)
 
+app.get("/getRole", getRoles)
+
 app.get("/getKompani", getKompanis)
 
 app.get("/getChild", getChilds)
@@ -139,22 +141,38 @@ async function deleteUsers(request){
     removeUser(user.name)
 }
 async function getUsersAdmins(request, response){
-    const sql = db.prepare("SELECT name, userType, role, kompani, userStatus, telefon, gender FROM users WHERE userType != 'Admin'");
+    const sql = db.prepare(`
+        SELECT users.name, users.userType, roler.roles, kompanier.kompani, users.userStatus, users.telefon, users.gender 
+        FROM users 
+        INNER JOIN kompanier ON users.kompani = kompanier.id 
+        INNER JOIN roler ON users.role = roler.id 
+        WHERE users.userType != 'Admin'; 
+    `);
     let rows = sql.all();
     let users = rows.map(user => ({
         name: user.name,
         telephone: user.telefon,
         gender: user.gender,
         userType: user.userType,
-        role: user.role,
+        role: user.roles,
         kompani: user.kompani,
         userstatus: user.userStatus
     }));
     response.send(users);
 }
 
+async function getRoles(request, response){
+    const sql = db.prepare('SELECT ID, roles FROM roler');
+    let rows = sql.all();
+    let roles = rows.map(role => ({
+        id: role.ID,
+        role: role.roles
+    }));
+    response.send(roles);
+}
+
 async function getKompanis(request, response) {
-    const sql = db.prepare('SELECT ID, kompani FROM kompanier');
+    const sql = db.prepare("SELECT ID, kompani FROM kompanier WHERE kompanier.kompani != 'Empty'");
     let rows = sql.all();
     let kompanis = rows.map(kompani => ({
         id: kompani.ID,
