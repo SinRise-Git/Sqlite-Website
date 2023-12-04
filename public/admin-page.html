@@ -13,26 +13,23 @@
             <h2>Show Users</h2>
             <table id="usersTable">
                 <div class="filters">
-                    <label for="filterRole">Filter Role:</label>
+                    <label for="nameSearch">Search</label>
+                    <input id="nameSearch" type="text" onchange="getUserAdmin()">
+                    <label for="filterRole">Role:</label>
                     <select name="filterRole" id="filterRole" onchange="getUserAdmin()">
                         <option value="All">All</option>
-                        <option value="Tamburmajor">Tamburmajor</option>
-                        <option value="Trommeslager">Trommeslager</option>
-                        <option value="Korpsfanebærer">Korpsfanebærer </option>
-                        <option value="Korpssjef">Korpssjef</option>
-                        <option value="Medlemmer">Medlemmer</option>
                     </select>
-                    <label for="filterKompani">Filter Kompani:</label>
+                    <label for="filterKompani">Kompani:</label>
                     <select name="filterKompani" id="filterKompani" onchange="getUserAdmin()">
                         <option value="All">All</option>
                     </select>
-                    <label for="filterUserstatus">Filter Userstatus:</label>
+                    <label for="filterUserstatus">Userstatus:</label>
                     <select name="filterUserstatus" id="filterUserstatus" onchange="getUserAdmin()">
                         <option value="All">All</option>
                         <option value="True">True</option>
                         <option value="False">False</option>
                     </select>
-                    <label for="filterUsertype">Filter Usertype:</label>
+                    <label for="filterUsertype">Usertype:</label>
                     <select name="filterUsertype" id="filterUsertype" onchange="getUserAdmin()">
                         <option value="All">All</option>
                         <option value="Medlem">Medlem</option>
@@ -69,12 +66,8 @@
                 </thead>
             </table>
         </div>
-        <button onclick="checkLoginAdmin()">Check Session</button>
     </div>
     <script>
-        async function checkLoginAdmin(){
-           let response = await fetch('/checkLoginAdmin')
-        }
         document.getElementById('addKompaniButton').addEventListener('click', async function(event) {
             event.preventDefault();
             const creatKompani = {
@@ -96,7 +89,7 @@
             let selectedKompani = document.getElementById("filterKompani").value;
             let selectedUserstatus = document.getElementById("filterUserstatus").value;
             let selectedUsertype = document.getElementById("filterUsertype").value;
-
+            let searchedName = document.getElementById("nameSearch").value.toLowerCase();
             let response = await fetch('/getUsersAdmin')
             let users = await response.json()
             let usersTable = document.getElementById("usersTable")
@@ -109,7 +102,8 @@
                 if ((selectedRole === "All" || user.role === selectedRole) &&
                     (selectedKompani === "All" || user.kompani === selectedKompani) && 
                     (selectedUserstatus === "All" || user.userstatus === selectedUserstatus) &&
-                    (selectedUsertype === "All" || user.userType === selectedUsertype) 
+                    (selectedUsertype === "All" || user.userType === selectedUsertype) &&
+                    (searchedName === "" || user.name.toLowerCase().includes(searchedName))
                     ){
                     let row = usersTable.insertRow();
                     row.insertCell().textContent = user.name;
@@ -211,8 +205,20 @@
                 kompaniTable.appendChild(option);
             });
         }
+        async function getRole(){
+            let response = await fetch('/getRole')
+            let roles = await response.json()
+            let rolesTable = document.getElementById("filterRole");
+            roles.forEach(role => {
+                let option = document.createElement("option");
+                option.value = role.role;
+                option.textContent = role.role;
+                rolesTable.appendChild(option);
+            });
+        }
         getKompaniFiler()
         getKompani()
+        getRole()
         getUserAdmin()
     </script>
 </body>

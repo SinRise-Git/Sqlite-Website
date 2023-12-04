@@ -8,10 +8,10 @@ const uuid = require('uuid')
 
 dotenv.config();
 
+
 const app = express();
 const staticPath = path.join(__dirname, 'public')
 const db = sqlite3('./users.db', { verbose: console.log })
-app.use(express.static(staticPath));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
@@ -20,6 +20,33 @@ app.use(session({
     resave: false,
     saveUninitialized: false
 }))
+
+const checkAuthorization = (allowedRoles) => {
+    return (request, response, next) => {
+      if (!request.session.loggedIn) {
+        return response.redirect('/login-page.html');
+      }
+      if (!allowedRoles.includes(request.session.loggedIn)) {
+        return response.status(403).send('Forbidden');
+      }
+      next();
+    };
+  };
+   
+app.get('/admin-page.html', checkAuthorization(['Admin']), (request, response) => {
+  response.sendFile(path.join(staticPath, '/admin-page.html'));
+});
+   
+app.get('/leder-page.html', checkAuthorization(['Leder']), (request, response) => {
+  response.sendFile(path.join(staticPath, '/leder-page.html'));
+});
+   
+app.get('/medlem-page.html', checkAuthorization(['Medlem']), (request, response) => {
+  response.sendFile(path.join(public, '/medlem-page.html'));
+});
+
+app.use(express.static(staticPath));
+
 
 function insertUser(name, password, userType, role, kompani, telephone, uuid, gender) {
     const sql = db.prepare("INSERT INTO users (name, password, userType, role, kompani, userStatus, uuid, telefon, gender) values (?, ?, ?, ?, ?, ?, ?, ?, ?)")
@@ -66,14 +93,11 @@ app.post("/deleteKompani", deleteKompanis)
 
 app.post("/loginUser", loginUsers)
 
-app.get("/getSession" , getSessions)
-
-app.get("/checkLoginAdmin", checkLoginAdmin)
 
 
 async function loginUsers(request, response) {
     const user = request.body;
-    const sqlUserType = db.prepare('SELECT userType, kompani, password, userStatus FROM users WHERE name = ?');
+    const sqlUserType = db.prepare('SELECT userType, uuid, kompani, password, userStatus FROM users WHERE name = ?');
     let rows = sqlUserType.all(user.name);
 
     if (rows.length === 0) {
@@ -95,6 +119,7 @@ async function loginUsers(request, response) {
             bcrypt.compare(user.password, storedUser.password, function (err, result) {
                 if (result) {
                     request.session.loggedIn = storedUser.userType;
+                    request.session.userUuid = storedUser.uuid
                     response.send({ 
                         redirectUrl: `/${storedUser.userType.toLowerCase()}-page.html`
                     });
@@ -106,18 +131,6 @@ async function loginUsers(request, response) {
                 }
             });
         }
-    }
-}
-
-async function getSessions(request, response){
-    console.log(request.session.loggedIn)
-}
-
-async function checkLoginAdmin (request, response){
-    if (request.session.loggedIn === undefined)   {
-        console.log("You are not ment to be here")
-    } else {
-        console.log("You can be here")
     }
 }
 
@@ -162,7 +175,7 @@ async function getUsersAdmins(request, response){
 }
 
 async function getRoles(request, response){
-    const sql = db.prepare('SELECT ID, roles FROM roler');
+    const sql = db.prepare("SELECT ID, roles FROM roler WHERE roler.roles != 'Empty'");
     let rows = sql.all();
     let roles = rows.map(role => ({
         id: role.ID,
@@ -210,3 +223,4 @@ async function createUsers(request, response) {
 app.listen(3000, () => {
     console.log("Server is running on http://localhost:3000/login-page.html");
 });
+
