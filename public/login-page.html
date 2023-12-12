@@ -89,13 +89,7 @@
                 document.getElementById("komaniOptionDiv").style.display = "block"
                 document.getElementById("childOptionDiv").style.display = "none"
             }
-        }
-
-        document.getElementById('checkSession').addEventListener('click', async function(event) {
-            event.preventDefault();
-            let response = await fetch('/getSession')
-        })      
-
+        }    
         document.getElementById('loginButton').addEventListener('click', async function(event) {
             event.preventDefault();
             

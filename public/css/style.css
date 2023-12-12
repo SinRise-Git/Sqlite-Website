@@ -1,4 +1,4 @@
-.showUsers tr, #kompaniTable tr {
+.showUsers tr, #kompaniTable tr, #PeletongTable tr {
     text-align: center;
 }
 
@@ -27,7 +27,7 @@ h2 {
     margin-left: 10px
 }
 
-.addKompani{
+.addKompani, .addPeletong{
     margin-left: 20px;
 }
 
@@ -37,4 +37,25 @@ h3{
 
 .loginForm p, .createForm p{
     color: red;
+}
+
+.addPeletong form {
+    margin-top: 15px;
+    margin-bottom: 15px;
+}
+
+
+#errorMessageKompani, #errorMessagePeletong {
+    color: red;
+    font-size: 13px;
+    margin-left: 10px;
+}
+
+#addKompaniButton {
+    margin-left: 10px;
+    margin-top: 10px;
+}
+
+#addPeletongButton {
+    margin-left: 10px;
 }

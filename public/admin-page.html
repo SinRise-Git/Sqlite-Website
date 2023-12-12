@@ -11,6 +11,7 @@
     <div class="main">
         <div class="showUsers">
             <h2>Show Users</h2>
+            <p>Antall brukere: (<span id="antall-brukere"></span>)</p>
             <table id="usersTable">
                 <div class="filters">
                     <label for="nameSearch">Search</label>
@@ -33,7 +34,7 @@
                     <select name="filterUsertype" id="filterUsertype" onchange="getUserAdmin()">
                         <option value="All">All</option>
                         <option value="Medlem">Medlem</option>
-                        <option value="Medlem">Foreldre</option>
+                        <option value="Foreldre">Foreldre</option>
                         <option value="Leder">Leder</option>
                     </select>  
                 </div>
@@ -56,8 +57,8 @@
                 <label for="addKompanis">Name:</label>
                 <input id="addKompanis" type="text" name="addKompanis" required>
             </form>
-            <br>
             <button id="addKompaniButton">Add Kompani</button>
+            <p id="errorMessageKompani"></p>
             <table id="kompaniTable">
                 <thead>
                     <tr>
@@ -66,8 +67,50 @@
                 </thead>
             </table>
         </div>
+        <div class="addPeletong">
+            <h3>Add Peletong</h3>
+            <label for="addPeletongKompani">Pick kompani for peletong</label>
+            <select name="addPeletongKompani" id="addPeletongKompani">
+
+            </select>
+            <form>
+              <label for="addPeletongs">Name:</label>
+              <input id="addPeletongs" type="text" name="addPeletongs">
+            </form>
+            <button id="addPeletongButton">Add Peletong</button>
+            <p id="errorMessagePeletong"></p>
+            <table id="PeletongTable">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Tilhører Kompani</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
     </div>
     <script>
+        document.getElementById('addPeletongButton').addEventListener('click', async function(event){
+            event.preventDefault(); 
+            const addPeletong = {
+                newPeletong: document.getElementById('addPeletongs').value,
+                kompani: document.getElementById('addPeletongKompani').value
+            };
+
+            const requestOptions = {
+                 method: 'POST',
+                 headers: { 'Content-Type': 'application/json' },
+                 body: JSON.stringify(addPeletong)
+            };
+           
+            const response = await fetch('/createPeletong', requestOptions);
+            const data = await response.json();
+            if (data.ErrorMessage) {
+                document.getElementById('errorMessagePeletong').innerText = data.ErrorMessage
+            } 
+            
+
+        })
         document.getElementById('addKompaniButton').addEventListener('click', async function(event) {
             event.preventDefault();
             const creatKompani = {
@@ -82,6 +125,9 @@
            
             const response = await fetch('/createKompani', requestOptions);
             const data = await response.json();
+            if (data.ErrorMessage) {
+                document.getElementById('errorMessageKompani').innerText = data.ErrorMessage
+            } 
         })    
 
         async function getUserAdmin() {
@@ -97,6 +143,7 @@
             while (usersTable.rows.length > 1) {
                 usersTable.deleteRow(1);
             }
+            var antallBrukere = 0;
 
             users.forEach(user => {
                 if ((selectedRole === "All" || user.role === selectedRole) &&
@@ -105,6 +152,7 @@
                     (selectedUsertype === "All" || user.userType === selectedUsertype) &&
                     (searchedName === "" || user.name.toLowerCase().includes(searchedName))
                     ){
+                    antallBrukere += 1
                     let row = usersTable.insertRow();
                     row.insertCell().textContent = user.name;
                     row.insertCell().textContent = user.telephone;
@@ -123,12 +171,13 @@
                     deleteButton.textContent = "Delete";
                     deleteButton.value = user.name;
                     row.insertCell().appendChild(deleteButton);
-                    deleteButton.addEventListener('click', showDelete(user.name))
-                    activateButton.addEventListener('click', showActivate(user.name))
+                    deleteButton.addEventListener('click', userDelete(user.name),)
+                    activateButton.addEventListener('click', userActivate(user.name),)
                 }
             });
+            document.getElementById("antall-brukere").textContent = antallBrukere;
         }
-        function showDelete(userName) {
+        function userDelete(userName) {
             return async function(event) {
                event.preventDefault();
                const deleteUser = {
@@ -145,7 +194,7 @@
             }
         };
         
-        function showActivate(userName) {
+        function userActivate(userName) {
             return async function(event) {
                event.preventDefault();
                const activateUser = {
@@ -165,6 +214,8 @@
             let response = await fetch('/getKompani')
             let kompanis = await response.json()
             let usersTable = document.getElementById("kompaniTable")
+            let peletongTable = document.getElementById("addPeletongKompani")
+            let kompaniTable = document.getElementById("filterKompani");
             kompanis.forEach(kompani => {
               let row = usersTable.insertRow()
               row.insertCell().textContent = kompani.kompani;
@@ -173,9 +224,17 @@
               deleteButton.textContent = "Delete";
               deleteButton.value = kompani.kompani;
               row.insertCell().appendChild(deleteButton);
-
               deleteButton.addEventListener('click', kompaniDelete(kompani.kompani))
-            
+             
+              let optionKompani = document.createElement("option");
+              optionKompani.value = kompani.kompani;
+              optionKompani.textContent = kompani.kompani;
+              kompaniTable.appendChild(optionKompani);  
+
+              let optionPeletong = document.createElement("option");
+              optionPeletong.value = kompani.id;
+              optionPeletong.textContent = kompani.kompani;
+              peletongTable.appendChild(optionPeletong); 
             });
         }
         function kompaniDelete(kompani) {
@@ -194,17 +253,6 @@
                  const data = await response.json();
             }
         };
-        async function getKompaniFiler(){
-            let response = await fetch('/getKompani')
-            let kompanis = await response.json()
-            let kompaniTable = document.getElementById("filterKompani");
-            kompanis.forEach(kompani => {
-                let option = document.createElement("option");
-                option.value = kompani.kompani;
-                option.textContent = kompani.kompani;
-                kompaniTable.appendChild(option);
-            });
-        }
         async function getRole(){
             let response = await fetch('/getRole')
             let roles = await response.json()
@@ -216,9 +264,41 @@
                 rolesTable.appendChild(option);
             });
         }
-        getKompaniFiler()
+        async function getPeleton(){
+            let response = await fetch('/getPeletong')
+            let peletongs = await response.json()
+            let peletongTable = document.getElementById("PeletongTable")
+            peletongs.forEach(peletong => {
+              let row = peletongTable.insertRow()
+              row.insertCell().textContent = peletong.peletong;
+              row.insertCell().textContent = peletong.kompani;
+              let deleteButton = document.createElement("button");
+              deleteButton.id = "deleteButtonPeltong"
+              deleteButton.textContent = "Delete";
+              deleteButton.value = peletong.peletong;
+              row.insertCell().appendChild(deleteButton);
+              deleteButton.addEventListener('click', peletongDelete(peletong.peletong));
+            });
+        }
+        async function peletongDelete(peletong) {
+            return async function(event) {
+               event.preventDefault();
+               const deletePeltong = {
+                 peletong: peletong
+                };
+
+                const requestOptions = {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(deletePeltong)
+                };
+                 const response = await fetch('/deletePeletong', requestOptions);
+                 const data = await response.json();
+            }
+        };
         getKompani()
         getRole()
+        getPeleton()
         getUserAdmin()
     </script>
 </body>

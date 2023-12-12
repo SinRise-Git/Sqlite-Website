@@ -42,7 +42,7 @@ app.get('/leder-page.html', checkAuthorization(['Leder']), (request, response) =
 });
    
 app.get('/medlem-page.html', checkAuthorization(['Medlem']), (request, response) => {
-  response.sendFile(path.join(public, '/medlem-page.html'));
+  response.sendFile(path.join(staticPath, '/medlem-page.html'));
 });
 
 app.use(express.static(staticPath));
@@ -68,10 +68,21 @@ function addKompani(newKompani){
     const info = sql.run(newKompani)
 }
 
+function addPeletong(newPeletong, kompani) {
+    const sql = db.prepare("INSERT INTO peletong (peletong_navn, kompani_id) values (?, ?)")
+    const info = sql.run(newPeletong, kompani)
+}
+
 function removeKompanis(removeKompanis){ 
     const sql = db.prepare("DELETE FROM kompanier WHERE kompani = ?");
     const info = sql.run(removeKompanis)    
 }
+
+function removePeletongs(removePeletongs){ 
+    const sql = db.prepare("DELETE FROM peletong WHERE peletong_navn = ?");
+    const info = sql.run(removePeletongs)    
+}
+
 
 app.post("/createUser", createUsers)
 
@@ -81,15 +92,21 @@ app.get("/getKompani", getKompanis)
 
 app.get("/getChild", getChilds)
 
+app.get("/getPeletong", getPeletongs)
+
 app.get("/getUsersAdmin", getUsersAdmins)
 
 app.post("/deleteUser", deleteUsers)
 
 app.put("/activateUser", activateUsers)
 
+app.post("/createPeletong", createPeletongs)
+
 app.post("/createKompani", createKompanis)
 
 app.post("/deleteKompani", deleteKompanis)
+
+app.post("/deletePeletong", deletePeletongs)
 
 app.post("/loginUser", loginUsers)
 
@@ -139,9 +156,34 @@ async function deleteKompanis(request, response) {
     removeKompanis(user.kompani)
 }
 
-async function createKompanis(request){
+async function deletePeletongs(request, response) {
+    console.log("HEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE")
+}
+
+async function createKompanis(request, response){
     const user = request.body
-    addKompani(user.newKompani)
+    const sql = db.prepare('SELECT kompani FROM kompanier WHERE kompani = ?');
+    let rows = sql.all(user.newKompani);
+    if (rows.length !== 0){
+        response.send({
+            ErrorMessage: `There is already a kompani with this name`
+        });
+    } else {
+        addKompani(user.newKompani)
+    }
+}
+
+async function createPeletongs(request, response){
+    const user = request.body
+    const sql = db.prepare('SELECT peletong_navn FROM peletong WHERE peletong_navn = ? AND kompani_id = ?');
+    let rows = sql.all(user.newPeletong, user.kompani);
+    if (rows.length !== 0){
+        response.send({
+            ErrorMessage: `There is already a peltong in this kompani with this name`
+        });
+    } else {
+        addPeletong(user.newPeletong, user.kompani)
+    }
 }
 
 async function activateUsers(request){
@@ -203,6 +245,19 @@ async function getChilds(request, response){
     response.send(childs);
 }
 
+async function getPeletongs(request, response){
+    const sql = db.prepare(`
+    SELECT peletong.peletong_navn, kompanier.kompani
+    FROM peletong
+    INNER JOIN kompanier ON peletong.kompani_id = kompanier.id;
+    `);
+    let rows = sql.all();
+    let peletongs = rows.map(peletong => ({
+        peletong: peletong.peletong_navn,
+        kompani: peletong.kompani
+    }));
+    response.send(peletongs);
+}
 async function createUsers(request, response) {
     const user = request.body
     const sql = db.prepare('SELECT name FROM users WHERE name = ?');
