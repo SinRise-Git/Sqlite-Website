@@ -69,7 +69,7 @@ function addKompani(newKompani){
 }
 
 function addPeletong(newPeletong, kompani) {
-    const sql = db.prepare("INSERT INTO peletong (peletong_navn, kompani_id) values (?, ?)")
+    const sql = db.prepare("INSERT INTO peletonger (peletong_navn, kompani_id) values (?, ?)")
     const info = sql.run(newPeletong, kompani)
 }
 
@@ -79,7 +79,7 @@ function removeKompanis(removeKompanis){
 }
 
 function removePeletongs(removePeletongs){ 
-    const sql = db.prepare("DELETE FROM peletong WHERE peletong_navn = ?");
+    const sql = db.prepare("DELETE FROM peletonger WHERE peletong_navn = ?");
     const info = sql.run(removePeletongs)    
 }
 
@@ -157,7 +157,8 @@ async function deleteKompanis(request, response) {
 }
 
 async function deletePeletongs(request, response) {
-    console.log("HEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE")
+    const user = request.body
+    removePeletongs(user.peletong)
 }
 
 async function createKompanis(request, response){
@@ -175,7 +176,7 @@ async function createKompanis(request, response){
 
 async function createPeletongs(request, response){
     const user = request.body
-    const sql = db.prepare('SELECT peletong_navn FROM peletong WHERE peletong_navn = ? AND kompani_id = ?');
+    const sql = db.prepare('SELECT peletong_navn FROM peletonger WHERE peletong_navn = ? AND kompani_id = ?');
     let rows = sql.all(user.newPeletong, user.kompani);
     if (rows.length !== 0){
         response.send({
@@ -197,10 +198,11 @@ async function deleteUsers(request){
 }
 async function getUsersAdmins(request, response){
     const sql = db.prepare(`
-        SELECT users.name, users.userType, roler.roles, kompanier.kompani, users.userStatus, users.telefon, users.gender 
+        SELECT users.name, users.userType, roler.roles, kompanier.kompani, users.userStatus, users.telefon, users.gender, peletonger.peletong_navn 
         FROM users 
         INNER JOIN kompanier ON users.kompani = kompanier.id 
         INNER JOIN roler ON users.role = roler.id 
+        INNER JOIN peletonger ON users.peletong = peletonger.id
         WHERE users.userType != 'Admin'; 
     `);
     let rows = sql.all();
@@ -211,6 +213,7 @@ async function getUsersAdmins(request, response){
         userType: user.userType,
         role: user.roles,
         kompani: user.kompani,
+        peletong: user.peletong_navn,
         userstatus: user.userStatus
     }));
     response.send(users);
@@ -227,14 +230,24 @@ async function getRoles(request, response){
 }
 
 async function getKompanis(request, response) {
-    const sql = db.prepare("SELECT ID, kompani FROM kompanier WHERE kompanier.kompani != 'Empty'");
+    const sql = db.prepare(`
+        SELECT kompanier.ID, kompanier.kompani,
+            (SELECT COUNT(DISTINCT peletonger.id) FROM peletonger WHERE peletonger.kompani_id = kompanier.id) AS amountPeletongs,
+            (SELECT COUNT(DISTINCT users.id) FROM users WHERE users.kompani = kompanier.id) AS amountUsers
+        FROM kompanier
+        WHERE kompanier.kompani != 'Empty'
+    `);
+
     let rows = sql.all();
     let kompanis = rows.map(kompani => ({
         id: kompani.ID,
-        kompani: kompani.kompani
+        kompani: kompani.kompani,
+        amountPeletongs: kompani.amountPeletongs,
+        amountUsers: kompani.amountUsers,
     }));
     response.send(kompanis);
 }
+
 
 async function getChilds(request, response){
     const sql = db.prepare("SELECT name FROM users WHERE userType = 'Medlem'");
@@ -245,19 +258,26 @@ async function getChilds(request, response){
     response.send(childs);
 }
 
-async function getPeletongs(request, response){
+async function getPeletongs(request, response) {
     const sql = db.prepare(`
-    SELECT peletong.peletong_navn, kompanier.kompani
-    FROM peletong
-    INNER JOIN kompanier ON peletong.kompani_id = kompanier.id;
+        SELECT peletonger.ID, peletonger.peletong_navn, kompanier.kompani,
+            (SELECT COUNT(DISTINCT users.id) FROM users WHERE users.peletong = peletonger.ID) AS amountUsers
+        FROM peletonger
+        INNER JOIN kompanier ON peletonger.kompani_id = kompanier.id
+        WHERE peletonger.kompani_id != '1'
     `);
+    
     let rows = sql.all();
-    let peletongs = rows.map(peletong => ({
-        peletong: peletong.peletong_navn,
-        kompani: peletong.kompani
-    }));
+    let peletongs = rows.map(peletong => (
+        {
+            peletong: peletong.peletong_navn,
+            kompani: peletong.kompani,
+            amountUsers: peletong.amountUsers,
+        }
+    ));
     response.send(peletongs);
 }
+
 async function createUsers(request, response) {
     const user = request.body
     const sql = db.prepare('SELECT name FROM users WHERE name = ?');

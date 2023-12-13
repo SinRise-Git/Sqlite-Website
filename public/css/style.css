@@ -1,13 +1,9 @@
-.showUsers tr, #kompaniTable tr, #PeletongTable tr {
+.showUsers tr, #kompaniTable tr, #peletongTable tr {
     text-align: center;
 }
 
-.showUsers th, #kompaniTable th {
+.showUsers th, #kompaniTable th, #peletongTable th  {
     padding: 10px 10px 10px 10px;
-}
-
-.showUsers button, #kompaniTable button{
-    padding: 5px 7px 5px 7px;
 }
 
 .showUsers{

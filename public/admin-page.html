@@ -21,9 +21,13 @@
                         <option value="All">All</option>
                     </select>
                     <label for="filterKompani">Kompani:</label>
-                    <select name="filterKompani" id="filterKompani" onchange="getUserAdmin()">
+                    <select name="filterKompani" id="filterKompani" onchange="getUserAdmin(), getPeleton()">
                         <option value="All">All</option>
                     </select>
+                    <label for="filterPeletong">Peletong:</label>
+                     <select name="filterPeletong" id="filterPeletong" onchange="getUserAdmin()">
+                        <option value="All">All</option>
+                     </select>
                     <label for="filterUserstatus">Userstatus:</label>
                     <select name="filterUserstatus" id="filterUserstatus" onchange="getUserAdmin()">
                         <option value="All">All</option>
@@ -46,6 +50,7 @@
                         <th>User Type</th>
                         <th>Role</th>
                         <th>Kompani</th>
+                        <th>Peletong</th>
                         <th>User Status</th>
                     </tr>
                 </thead>
@@ -63,6 +68,8 @@
                 <thead>
                     <tr>
                         <th>Name</th>
+                        <th>Peletonger</th>
+                        <th>Brukere</th>
                     </tr>
                 </thead>
             </table>
@@ -79,11 +86,12 @@
             </form>
             <button id="addPeletongButton">Add Peletong</button>
             <p id="errorMessagePeletong"></p>
-            <table id="PeletongTable">
+            <table id="peletongTable">
                 <thead>
                     <tr>
                         <th>Name</th>
                         <th>Tilhører Kompani</th>
+                        <th>Brukere</th>
                     </tr>
                 </thead>
             </table>
@@ -133,6 +141,7 @@
         async function getUserAdmin() {
             let selectedRole = document.getElementById("filterRole").value;
             let selectedKompani = document.getElementById("filterKompani").value;
+            let selectedPeletong = document.getElementById("filterPeletong").value
             let selectedUserstatus = document.getElementById("filterUserstatus").value;
             let selectedUsertype = document.getElementById("filterUsertype").value;
             let searchedName = document.getElementById("nameSearch").value.toLowerCase();
@@ -144,10 +153,10 @@
                 usersTable.deleteRow(1);
             }
             var antallBrukere = 0;
-
             users.forEach(user => {
                 if ((selectedRole === "All" || user.role === selectedRole) &&
                     (selectedKompani === "All" || user.kompani === selectedKompani) && 
+                    (selectedPeletong === "All" || user.peletong === selectedPeletong) && 
                     (selectedUserstatus === "All" || user.userstatus === selectedUserstatus) &&
                     (selectedUsertype === "All" || user.userType === selectedUsertype) &&
                     (searchedName === "" || user.name.toLowerCase().includes(searchedName))
@@ -160,6 +169,7 @@
                     row.insertCell().textContent = user.userType;
                     row.insertCell().textContent = user.role;
                     row.insertCell().textContent = user.kompani;
+                    row.insertCell().textContent = user.peletong
                     row.insertCell().textContent = user.userstatus;
                     let activateButton = document.createElement("button");
                     activateButton.id = "activateButton"
@@ -219,6 +229,8 @@
             kompanis.forEach(kompani => {
               let row = usersTable.insertRow()
               row.insertCell().textContent = kompani.kompani;
+              row.insertCell().textContent = kompani.amountPeletongs
+              row.insertCell().textContent = kompani.amountUsers
               let deleteButton = document.createElement("button");
               deleteButton.id = "deleteButtonKompani"
               deleteButton.textContent = "Delete";
@@ -267,30 +279,51 @@
         async function getPeleton(){
             let response = await fetch('/getPeletong')
             let peletongs = await response.json()
-            let peletongTable = document.getElementById("PeletongTable")
+            let peletongTable = document.getElementById("peletongTable")
+            let peletongFilter = document.getElementById("filterPeletong")
+            while (peletongTable.rows.length > 1) {
+                peletongTable.deleteRow(1);
+            }
+            while (peletongFilter.options.length > 1) {
+                peletongFilter.remove(1);
+            }
             peletongs.forEach(peletong => {
               let row = peletongTable.insertRow()
               row.insertCell().textContent = peletong.peletong;
               row.insertCell().textContent = peletong.kompani;
+              row.insertCell().textContent = peletong.amountUsers
               let deleteButton = document.createElement("button");
               deleteButton.id = "deleteButtonPeltong"
               deleteButton.textContent = "Delete";
               deleteButton.value = peletong.peletong;
               row.insertCell().appendChild(deleteButton);
               deleteButton.addEventListener('click', peletongDelete(peletong.peletong));
+              if (document.getElementById("filterKompani").value === "All"){
+                let optionPeletong = document.createElement("option");
+                optionPeletong.value =  peletong.peletong;
+                optionPeletong.textContent = peletong.peletong;
+                peletongFilter.appendChild(optionPeletong);  
+              } else {
+                if (peletong.kompani === document.getElementById("filterKompani").value) {
+                    let optionPeletong = document.createElement("option");
+                    optionPeletong.value =  peletong.peletong;
+                    optionPeletong.textContent = peletong.peletong;
+                    peletongFilter.appendChild(optionPeletong);  
+                }        
+              }
             });
         }
-        async function peletongDelete(peletong) {
+        function peletongDelete(peletong) {
             return async function(event) {
                event.preventDefault();
-               const deletePeltong = {
+               const deletePeletong  = {
                  peletong: peletong
                 };
 
                 const requestOptions = {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify(deletePeltong)
+                  body: JSON.stringify(deletePeletong)
                 };
                  const response = await fetch('/deletePeletong', requestOptions);
                  const data = await response.json();
