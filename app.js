@@ -48,9 +48,9 @@ app.get('/medlem-page.html', checkAuthorization(['Medlem']), (request, response)
 app.use(express.static(staticPath));
 
 
-function insertUser(name, password, userType, role, kompani, telephone, uuid, gender) {
-    const sql = db.prepare("INSERT INTO users (name, password, userType, role, kompani, userStatus, uuid, telefon, gender) values (?, ?, ?, ?, ?, ?, ?, ?, ?)")
-    const info = sql.run(name, password, userType, role, kompani, "False", uuid, telephone, gender)
+function insertUser(name, password, userType, role, kompani, peletong, telephone, uuid, gender) {
+    const sql = db.prepare("INSERT INTO users (name, password, userType, role, kompani, peletong, userStatus, uuid, telefon, gender) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+    const info = sql.run(name, password, userType, role, kompani, peletong, "False", uuid, telephone, gender)
 }
 
 function removeUser(name){
@@ -270,6 +270,7 @@ async function getPeletongs(request, response) {
     let rows = sql.all();
     let peletongs = rows.map(peletong => (
         {
+            id: peletong.ID,
             peletong: peletong.peletong_navn,
             kompani: peletong.kompani,
             amountUsers: peletong.amountUsers,
@@ -289,7 +290,7 @@ async function createUsers(request, response) {
     } else {
         const hashPassword = bcrypt.hashSync(user.password, 10)
         const UUID = uuid.v4();
-        insertUser(user.name, hashPassword, user.userType, user.role, user.kompani, user.telephone, UUID, user.gender);
+        insertUser(user.name, hashPassword, user.userType, user.role, user.kompani, user.peletong, user.telephone, UUID, user.gender, );
         response.send({ redirectUrl: `/login-page.html` });
     }
     

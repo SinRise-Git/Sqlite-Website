@@ -54,13 +54,18 @@
                   <select id="roleOption" name="roleOption">
                   </select>
                 </div>
-                <div class="komaniOptionDiv" id="komaniOptionDiv" style="display: block;"> 
-                 <label for="komaniOption">Select an kompani:</label>
+                <div class="komaniOptionDiv" id="komaniOptionDiv" style="display: block;" onchange="getPeletong()"> 
+                 <label for="komaniOption">Select a kompani:</label>
                   <select id="komaniOption" name="komaniOption">
                   </select>    
                 </div>
+                <div class="peletongOptionDiv" id="peletongOptionDiv" style="display: block;">
+                    <label for="peletongOption">Select a peletong</label>
+                     <select id="peletongOption" name="peletongOption">
+                     </select>
+                </div>
                 <div class="childOptionDiv" id="childOptionDiv" style="display: none;"> 
-                    <label for="childOption">Select an child:</label>
+                    <label for="childOption">Select a child:</label>
                      <select id="childOption" name="childOption">
                      </select>    
                 </div>   
@@ -82,11 +87,13 @@
             if (user == "Foreldre"){
                 document.getElementById("roleOptionDiv").style.display = "none"
                 document.getElementById("komaniOptionDiv").style.display = "none"
+                document.getElementById("peletongOptionDiv").style.display = "none"
                 document.getElementById("childOptionDiv").style.display = "block"
             }
             else {
                 document.getElementById("roleOptionDiv").style.display = "block"
                 document.getElementById("komaniOptionDiv").style.display = "block"
+                document.getElementById("peletongOptionDiv").style.display = "block"
                 document.getElementById("childOptionDiv").style.display = "none"
             }
         }    
@@ -135,6 +142,24 @@
                 kompaniTable.appendChild(option);
             });
         }
+        async function getPeletong(){
+            let response = await fetch('/getPeletong')
+            let peletongs = await response.json()
+            let peletongTable = document.getElementById("peletongOption")
+            let selectedKompani = document.getElementById("komaniOption");
+            while (peletongTable.options.length) {
+                peletongTable.remove(0);
+            }
+            peletongs.forEach(peletong => {
+                if (peletong.kompani === selectedKompani.options[selectedKompani.selectedIndex].text){
+                    let optionPeletong = document.createElement("option");
+                    optionPeletong.value =  peletong.id;
+                    optionPeletong.textContent = peletong.peletong;
+                    peletongTable.appendChild(optionPeletong);         
+                } 
+            });
+        }
+
         async function getChild(){
             let response = await fetch('/getChild')
             let childs = await response.json()
@@ -149,16 +174,19 @@
         
         document.getElementById('createButton').addEventListener('click', async function(event) {
             event.preventDefault();
+            let selectedKompani = document.getElementById("komaniOption");
             
             const createUser = {
                 name: document.getElementById('createUsername').value,
                 password: document.getElementById('createPassword').value,
                 telephone: document.getElementById('createTelephone').value,
                 userType: document.getElementById('userOption').value,
-                role: document.getElementById('userOption').value === 'Foreldre' ? "1" : document.getElementById('roleOption').value,
-                kompani: document.getElementById('userOption').value === 'Foreldre' ? "6" : document.getElementById('komaniOption').value,
+                role: document.getElementById('userOption').value === 'Foreldre' ? "6" : document.getElementById('roleOption').value,
+                kompani: document.getElementById('userOption').value === 'Foreldre' ? "1" : document.getElementById('komaniOption').value,
+                peletong: document.getElementById('userOption').value === 'Foreldre' ? "1" : document.getElementById('peletongOption').value,
                 gender: document.getElementById('genderOption').value,
             };
+            console.log(createUser)
 
             const requestOptions = {
                  method: 'POST',
@@ -174,10 +202,11 @@
             }
         
 
-        })      
-        getChild();
+        })    
         getRole();
         getKompani();
+        getPeletong(); 
+        getChild();
     </script>
 </body>
 </html>
