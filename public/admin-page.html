@@ -4,11 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin</title>
-    <link rel="stylesheet" href="./css/style.css">
+    <link rel="stylesheet" href="./css/admin.css">
 </head>
 <body>
-    <h2>Admin page</h2>
     <div class="main">
+        <div class="nav-bar">
+            <div class="user">
+              <h1>Admin Page</h1>
+            </div>
+            <div class="logout">
+              <button id="logoutButton">Logout</button>
+            </div>
+        </div>
         <div class="showUsers">
             <h2>Show Users</h2>
             <p>Antall brukere: (<span id="antall-brukere"></span>)</p>
@@ -181,8 +188,8 @@
                     deleteButton.textContent = "Delete";
                     deleteButton.value = user.name;
                     row.insertCell().appendChild(deleteButton);
-                    deleteButton.addEventListener('click', userDelete(user.name),)
-                    activateButton.addEventListener('click', userActivate(user.name),)
+                    deleteButton.addEventListener('click', userDelete(user.name))
+                    activateButton.addEventListener('click', userActivate(user.name))
                 }
             });
             document.getElementById("antall-brukere").textContent = antallBrukere;
@@ -329,6 +336,14 @@
                  const data = await response.json();
             }
         };
+        document.getElementById('logoutButton').addEventListener('click', async function(event) {
+            event.preventDefault();
+            let response = await fetch('/logout')
+            let data = await response.json()
+            if (data.redirectUrl) {
+               window.location.href = data.redirectUrl;
+            }
+        })    
         getKompani()
         getRole()
         getPeleton()

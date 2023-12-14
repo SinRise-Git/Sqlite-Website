@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <link rel="stylesheet" href="./css/style.css">
+    <link rel="stylesheet" href="./css/login.css">
 </head>
 <body>
     <div class="main">
@@ -89,6 +89,12 @@
                 document.getElementById("komaniOptionDiv").style.display = "none"
                 document.getElementById("peletongOptionDiv").style.display = "none"
                 document.getElementById("childOptionDiv").style.display = "block"
+            }
+            else if (user == "Leder") {
+                document.getElementById("roleOptionDiv").style.display = "none"
+                document.getElementById("komaniOptionDiv").style.display = "block"
+                document.getElementById("peletongOptionDiv").style.display = "none"
+                document.getElementById("childOptionDiv").style.display = "none"
             }
             else {
                 document.getElementById("roleOptionDiv").style.display = "block"
@@ -181,9 +187,9 @@
                 password: document.getElementById('createPassword').value,
                 telephone: document.getElementById('createTelephone').value,
                 userType: document.getElementById('userOption').value,
-                role: document.getElementById('userOption').value === 'Foreldre' ? "6" : document.getElementById('roleOption').value,
+                role: document.getElementById('userOption').value === 'Foreldre' || document.getElementById('userOption').value === 'Leder' ? "6" : document.getElementById('roleOption').value,
                 kompani: document.getElementById('userOption').value === 'Foreldre' ? "1" : document.getElementById('komaniOption').value,
-                peletong: document.getElementById('userOption').value === 'Foreldre' ? "1" : document.getElementById('peletongOption').value,
+                peletong: document.getElementById('userOption').value === 'Foreldre' || document.getElementById('userOption').value === 'Leder' ? "1" : document.getElementById('peletongOption').value,
                 gender: document.getElementById('genderOption').value,
             };
             console.log(createUser)

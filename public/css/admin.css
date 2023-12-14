@@ -1,3 +1,7 @@
+body {
+    margin: 0px;
+}
+
 .showUsers tr, #kompaniTable tr, #peletongTable tr {
     text-align: center;
 }
@@ -54,4 +58,26 @@ h3{
 
 #addPeletongButton {
     margin-left: 10px;
+}
+
+.nav-bar{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0px 20px 0px 20px;
+    margin: 0px;
+    color: white;
+    background-color: black
+
+}
+
+.nav-bar button{
+   padding: 10px 20px 10px 20px ;
+   color: white;
+   background-color: gray;
+   border-radius: 5px;
+   border: 0px solid;
+   background-color: transparent;
+   cursor: pointer;
+   font-size: 20px;
 }

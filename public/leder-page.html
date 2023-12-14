@@ -4,11 +4,137 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Leder</title>
+    <link rel="stylesheet" href="./css/leder.css">
 </head>
 <body>
-    <h1>Leader Page</h1>
+    <div class="main">
+        <div class="nav-bar">
+            <div class="user">
+              <h1>Leder Page</h1>
+            </div>
+            <div class="settings">
+            </div>
+            <div class="logout">
+                <div class="buttons">
+                    <button id="settingButton">Bruker innstillinger</button>
+                    <button id="logoutButton">Logout</button> 
+                </div>
+            </div>
+        </div>
+        <div id="settingsOverlay" class="overlay">
+            <div class="overlay-content">
+                <h1>Endre innstillinger</h1>
+                <p>Navn: <input id="changeName" type="text"></p>
+                <p>Telefon: <input id="changePhone" type="text"></p>
+                <p id="messageSettings"></p>
+                 <div class="buttons">
+                     <button id="changeSettings" onclick=" userInfo()">Large</button>
+                     <button id="exitSettings">Exit</button>
+               </div>
+            </div>
+        </div>
+        <div class="content">
+           <div class="top">
+              <div class="userInfo">
+                <h1>Velkommen <span id="userName"></span></h1>
+                <p>Du er ledere for kompani <span id="kompaniName"></span>.</p>
+                <p>Som har <span id="usersAmount"></span> medlemmer.</p>
+                <p><span id="amountActive"></span> godkjente brukere.</p>
+                <p><span id="amountNotActive"></span> ikke godkjente bruker.</p>
+                <p>Og har <span id="peletongAmount"></span> peletonger</p>
+                <p>Ditt telefon number er <span id="telefonValue"></span></p>
+                <p>Og vi håper du har en fin opplevels med vår platform.</p>
+              </div>
+              <div class="accountRequest">
+                 <h1>Bruker godkjenning</h1>
+              </div>
+           </div>
+           <div class="bottom">
+              <div class="filters"></div>
+           </div>
+        </div>
+    </div>
 </body>
 <script>
-   
+    async function userInfo(){
+        let response = await fetch('/userInfo')
+        let data = await response.json()
+        data.forEach(user => {
+            document.getElementById("userName").textContent = user.name
+            document.getElementById("kompaniName").textContent = user.kompani
+            document.getElementById("usersAmount").textContent = user.amountUsers  
+            document.getElementById("amountActive").textContent = user.amountUsersActive
+            document.getElementById("amountNotActive").textContent = user.amountUsersNotActive
+            document.getElementById("peletongAmount").textContent = user.amountPeletongs
+            document.getElementById("telefonValue").textContent = user.telephone
+            document.getElementById('changeName').placeholder = user.name;
+            document.getElementById('changePhone').placeholder = user.telephone;
+        });
+    }
+
+    document.getElementById('logoutButton').addEventListener('click', async function(event) {
+        event.preventDefault();
+        let response = await fetch('/logout')
+        let data = await response.json()
+        if (data.redirectUrl) {
+               window.location.href = data.redirectUrl;
+        }
+    })  
+    document.getElementById('changeSettings').addEventListener('click', async function(event) {
+        let changeNameInput = document.getElementById("changeName");
+        let changePhoneInput = document.getElementById("changePhone");
+
+        let newName = changeNameInput.value !== "" ? changeNameInput.value : changeNameInput.placeholder;
+        let newPhone = changePhoneInput.value !== "" ? changePhoneInput.value : changePhoneInput.placeholder;
+
+        const updateUser = {
+            name: newName,
+            telephone: newPhone
+        };
+
+        const requestOptions = {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(updateUser)
+        };
+        const response = await fetch('/changeSettings', requestOptions);
+        const data = await response.json(); 
+        if (data.ErrorMessage) {
+            document.getElementById('messageSettings').innerText = data.ErrorMessage
+            document.getElementById('messageSettings').style.color = "red"
+        } else if (data.Message) {
+            document.getElementById('messageSettings').innerText = data.Message
+            document.getElementById('messageSettings').style.color = "green"
+            document.getElementById("changeName").value = "";
+            document.getElementById("changePhone").value = "";
+        }
+    })
+  
+
+
+    let overlay = document.getElementById("settingsOverlay");
+    let btn = document.getElementById("settingButton");
+    let exit = document.getElementById("exitSettings");
+
+    btn.onclick = function() {
+        overlay.style.display = "block";
+    } 
+
+    exit.onclick = function() {
+        overlay.style.display = "none";
+        document.getElementById("changeName").value = "";
+        document.getElementById("changePhone").value = "";
+        document.getElementById('messageSettings').innerText = ""
+    }
+
+    window.onclick = function(event) {
+    if (event.target == overlay) {
+        overlay.style.display = "none";
+        document.getElementById("changeName").value = "";
+        document.getElementById("changePhone").value = "";
+        document.getElementById('messageSettings').innerText = ""
+    }
+    }
+    userInfo()
 </script>
 </html>

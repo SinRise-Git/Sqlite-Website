@@ -53,6 +53,11 @@ function insertUser(name, password, userType, role, kompani, peletong, telephone
     const info = sql.run(name, password, userType, role, kompani, peletong, "False", uuid, telephone, gender)
 }
 
+function updateUser(name, telephone, uuid) {
+    const sql = db.prepare("UPDATE users SET name = ?, telefon = ? WHERE uuid = ?");
+    const info = sql.run(name, telephone, uuid)
+}
+
 function removeUser(name){
     const sql = db.prepare("DELETE FROM users WHERE name = ?");
     const info = sql.run(name)
@@ -110,7 +115,11 @@ app.post("/deletePeletong", deletePeletongs)
 
 app.post("/loginUser", loginUsers)
 
+app.get("/userInfo", getUserInfo)
 
+app.put("/changeSettings", changeSettings)
+
+app.get("/logout", logout)
 
 async function loginUsers(request, response) {
     const user = request.body;
@@ -151,6 +160,29 @@ async function loginUsers(request, response) {
     }
 }
 
+async function getUserInfo(request, response){
+    const sql = db.prepare(`
+       SELECT users.name, kompanier.kompani, users.telefon,
+            (SELECT COUNT(DISTINCT peletonger.id) FROM peletonger WHERE peletonger.kompani_id = users.kompani) AS amountPeletongs,
+            (SELECT COUNT(DISTINCT users.id) FROM users WHERE users.kompani = kompanier.id AND users.usertype = 'Medlem') AS amountUsers,
+            (SELECT COUNT(DISTINCT users.id) FROM users WHERE users.kompani = kompanier.id AND users.userStatus = 'True' AND users.usertype = 'Medlem') AS amountUsersActive,
+            (SELECT COUNT(DISTINCT users.id) FROM users WHERE users.kompani = kompanier.id AND users.userStatus = 'False' AND users.usertype = 'Medlem') AS amountUsersNotActive
+       FROM users 
+       INNER JOIN kompanier ON users.kompani = kompanier.id 
+       WHERE users.uuid = ?
+    `)
+    let rows = sql.all(request.session.userUuid)
+    let users = rows.map(user => ({
+        name: user.name,
+        kompani: user.kompani,
+        amountUsers: user.amountUsers,
+        amountUsersActive: user.amountUsersActive,
+        amountUsersNotActive: user.amountUsersNotActive,
+        amountPeletongs: user.amountPeletongs,
+        telephone: user.telefon,
+    }));
+    response.send(users);
+}
 async function deleteKompanis(request, response) {
     const user = request.body
     removeKompanis(user.kompani)
@@ -294,6 +326,30 @@ async function createUsers(request, response) {
         response.send({ redirectUrl: `/login-page.html` });
     }
     
+}
+
+async function changeSettings(request, response) {
+    const user = request.body
+    const sql = db.prepare('SELECT name FROM users WHERE name = ? AND uuid != ?');
+    let rows = sql.all(user.name, request.session.userUuid);
+    if (rows.length !== 0){
+        response.send({
+            ErrorMessage: `There is already a user with this name`
+        });
+    } else {
+        updateUser(user.name, user.telephone, request.session.userUuid)
+        response.send({
+            Message: `The changes has been saved`
+        });
+    }
+}
+
+async function logout(request, response) {
+    request.session.loggedIn = undefined
+    request.session.userUuid = undefined
+    response.send({ 
+        redirectUrl: `/login-page.html`
+    });
 }
 
 app.listen(3000, () => {
