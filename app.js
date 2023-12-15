@@ -99,7 +99,11 @@ app.get("/getChild", getChilds)
 
 app.get("/getPeletong", getPeletongs)
 
+app.get("/getPeletongLeder", getPeletongLeders)
+
 app.get("/getUsersAdmin", getUsersAdmins)
+
+app.get("/getUsersLeder", getUsersLeders)
 
 app.post("/deleteUser", deleteUsers)
 
@@ -146,6 +150,7 @@ async function loginUsers(request, response) {
                 if (result) {
                     request.session.loggedIn = storedUser.userType;
                     request.session.userUuid = storedUser.uuid
+                    request.session.userKompani = storedUser.kompani;
                     response.send({ 
                         redirectUrl: `/${storedUser.userType.toLowerCase()}-page.html`
                     });
@@ -189,13 +194,27 @@ async function deleteKompanis(request, response) {
 }
 
 async function deletePeletongs(request, response) {
-    const user = request.body
-    removePeletongs(user.peletong)
+    const user = request.body;
+    const sql = db.prepare(`
+    SELECT COUNT(*) as count FROM users 
+    INNER JOIN peletonger ON users.peletong = peletonger.id
+    WHERE peletonger.peletong_navn = ?
+    `);
+    let rows = sql.all(user.peletong);
+
+    if (rows[0].count > 0){
+        console.log("Cant delete peletong since it has users")
+        response.send({
+            ErrorMessage: `Cant delete peletong since it has users`
+        });
+    } else {
+        removePeletongs(user.peletong)
+    }
 }
 
 async function createKompanis(request, response){
     const user = request.body
-    const sql = db.prepare('SELECT kompani FROM kompanier WHERE kompani = ?');
+    const sql = db.prepare(`SELECT kompani FROM kompanier WHERE kompani = ?`);
     let rows = sql.all(user.newKompani);
     if (rows.length !== 0){
         response.send({
@@ -228,6 +247,31 @@ async function deleteUsers(request){
     const user = request.body
     removeUser(user.name)
 }
+
+async function getUsersLeders(request, response) {
+    const sql = db.prepare(`
+        SELECT users.name, roler.roles, kompanier.kompani, users.userType, users.telefon, users.gender, peletonger.peletong_navn, users.userStatus
+        FROM users 
+        INNER JOIN kompanier ON users.kompani = kompanier.id 
+        INNER JOIN roler ON users.role = roler.id 
+        INNER JOIN peletonger ON users.peletong = peletonger.id
+        WHERE users.userType = 'Medlem' AND users.kompani = ?
+    `);
+    let rows = sql.all(request.session.userKompani);
+    let users = rows.map(user => ({
+        name: user.name,
+        telephone: user.telefon,
+        gender: user.gender,
+        userType: user.userType,
+        role: user.roles,
+        kompani: user.kompani,
+        peletong: user.peletong_navn,
+        userstatus: user.userStatus
+    }));
+    console.log(users)
+    response.send(users);
+}
+
 async function getUsersAdmins(request, response){
     const sql = db.prepare(`
         SELECT users.name, users.userType, roler.roles, kompanier.kompani, users.userStatus, users.telefon, users.gender, peletonger.peletong_navn 
@@ -311,6 +355,25 @@ async function getPeletongs(request, response) {
     response.send(peletongs);
 }
 
+async function getPeletongLeders(request, response) {
+    const sql = db.prepare(`
+        SELECT peletonger.ID, peletonger.peletong_navn, peletonger.kompani_id, 
+            (SELECT COUNT(DISTINCT users.id) FROM users WHERE users.peletong = peletonger.ID) AS amountUsers
+        FROM peletonger
+        INNER JOIN kompanier ON peletonger.kompani_id = kompanier.id
+        WHERE peletonger.kompani_id = ?
+    `);
+    
+    let rows = sql.all(request.session.userKompani);
+    let peletongs = rows.map(peletong => (
+        {
+            peletong: peletong.peletong_navn,
+            amountUsers: peletong.amountUsers,
+        }
+    ));
+    response.send(peletongs)
+}
+
 async function createUsers(request, response) {
     const user = request.body
     const sql = db.prepare('SELECT name FROM users WHERE name = ?');
@@ -347,6 +410,7 @@ async function changeSettings(request, response) {
 async function logout(request, response) {
     request.session.loggedIn = undefined
     request.session.userUuid = undefined
+    request.session.userKompani = undefined
     response.send({ 
         redirectUrl: `/login-page.html`
     });

@@ -33,14 +33,14 @@ body {
 
 }
 
-.top div {
+.top .userInfo, .lederPeletong {
     background-color: black;
     padding: 20px;
     border-radius: 10px;
 }
 
 .top p {
-    font-size: 18px;
+    font-size: 1rem;
 }
 
 .overlay {
@@ -77,4 +77,20 @@ body {
 #messageSettings {
     color: red;
     font-size: 13px;
+}
+
+.confirmAccounts{
+    padding: 1px;
+}
+
+#peletongTable tr {
+    text-align: center;
+}
+
+#peletongTable th {
+    padding: 5px;
+}
+
+#peletongTable {
+    margin-top: 10px;
 }

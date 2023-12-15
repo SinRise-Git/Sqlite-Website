@@ -38,15 +38,26 @@
               <div class="userInfo">
                 <h1>Velkommen <span id="userName"></span></h1>
                 <p>Du er ledere for kompani <span id="kompaniName"></span>.</p>
-                <p>Som har <span id="usersAmount"></span> medlemmer.</p>
-                <p><span id="amountActive"></span> godkjente brukere.</p>
-                <p><span id="amountNotActive"></span> ikke godkjente bruker.</p>
-                <p>Og har <span id="peletongAmount"></span> peletonger</p>
+                <p>Kompaniet ditt har <span id="usersAmount"></span> medlemmer.</p>
+                <p>Den har <span id="amountActive"></span> godkjente brukere.</p>
+                <p>Og den har <span id="amountNotActive"></span> ikke godkjente bruker.</p>
+                <p>Kompaniet har <span id="peletongAmount"></span> peletonger.</p>
                 <p>Ditt telefon number er <span id="telefonValue"></span></p>
-                <p>Og vi håper du har en fin opplevels med vår platform.</p>
               </div>
-              <div class="accountRequest">
-                 <h1>Bruker godkjenning</h1>
+              <div class="lederPeletong">
+                 <h1>Legg til Peletong</h1>
+                 <label for="lederAddPeletong">Navn:</label>
+                 <input id="lederAddPeletong" type="text"><br>
+                 <br><button>Legg til</button>
+                 <table id="peletongTable">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Antall Brukere</th>
+                        </tr>
+                    </thead>
+                 </table>
+                 <p id="addPeletongError"></p>
               </div>
            </div>
            <div class="bottom">
@@ -71,6 +82,44 @@
             document.getElementById('changePhone').placeholder = user.telephone;
         });
     }
+
+    async function getUsersLeder(){
+        let response = await fetch('/getUsersLeder')
+        let data = await response.json()
+    }
+    async function getPeleton(){
+            let response = await fetch('/getPeletongLeder')
+            let peletongs = await response.json()
+            let peletongTable = document.getElementById("peletongTable")
+            peletongs.forEach(peletong => {
+              let row = peletongTable.insertRow()
+              row.insertCell().textContent = peletong.peletong;
+              row.insertCell().textContent = peletong.amountUsers
+              let deleteButton = document.createElement("button");
+              deleteButton.id = "deleteButtonPeltong"
+              deleteButton.textContent = "Delete";
+              deleteButton.value = peletong.peletong;
+              row.insertCell().appendChild(deleteButton);
+              deleteButton.addEventListener('click', peletongDelete(peletong.peletong));
+            });
+    }
+
+    function peletongDelete(peletong) {
+            return async function(event) {
+               event.preventDefault();
+               const deletePeletong  = {
+                 peletong: peletong
+                };
+
+                const requestOptions = {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(deletePeletong)
+                };
+                 const response = await fetch('/deletePeletong', requestOptions);
+                 const data = await response.json();
+            }
+        };
 
     document.getElementById('logoutButton').addEventListener('click', async function(event) {
         event.preventDefault();
@@ -136,5 +185,7 @@
     }
     }
     userInfo()
+    getPeleton()
+    getUsersLeder()
 </script>
 </html>
