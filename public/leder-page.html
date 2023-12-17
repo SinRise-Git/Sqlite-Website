@@ -1,72 +1,92 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+  <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Leder</title>
     <link rel="stylesheet" href="./css/leder.css">
-</head>
-<body>
+  </head>
+  <body>
     <div class="main">
-        <div class="nav-bar">
-            <div class="user">
-              <h1>Leder Page</h1>
+      <div class="nav-bar">
+        <div class="user">
+          <h1>Leder Page</h1>
+        </div>
+        <div class="settings"></div>
+        <div class="logout">
+          <div class="buttons">
+            <button id="settingButton">Bruker innstillinger</button>
+            <button id="logoutButton">Logout</button>
+          </div>
+        </div>
+      </div>
+      <div id="settingsOverlay" class="overlay">
+        <div class="overlay-content">
+          <h1>Endre innstillinger</h1>
+          <p>Navn: <input id="changeName" type="text">
+          </p>
+          <p>Telefon: <input id="changePhone" type="text">
+          </p>
+          <p id="messageSettings"></p>
+          <div class="buttons">
+            <button id="changeSettings" onclick=" userInfo()">Large</button>
+            <button id="exitSettings">Exit</button>
+          </div>
+        </div>
+      </div>
+      <div class="content">
+        <div class="top">
+            <div class="userInfo">
+              <h1>Velkommen <span id="userName"></span>
+              </h1>
+              <p>Du er ledere for kompani <span id="kompaniName"></span>. </p>
+              <p>Kompaniet ditt har <span id="usersAmount"></span> medlemmer. </p>
+              <p>Den har <span id="amountActive"></span> godkjente brukere. </p>
+              <p>Og den har <span id="amountNotActive"></span> ikke godkjente bruker. </p>
+              <p>Kompaniet har <span id="peletongAmount"></span> peletonger. </p>
+              <p>Ditt telefon number er <span id="telefonValue"></span>
+              </p>
             </div>
-            <div class="settings">
-            </div>
-            <div class="logout">
-                <div class="buttons">
-                    <button id="settingButton">Bruker innstillinger</button>
-                    <button id="logoutButton">Logout</button> 
-                </div>
+            <div class="lederPeletong">
+              <h1>Legg til Peletong</h1>
+              <label for="lederAddPeletong">Navn:</label>
+              <input id="lederAddPeletong" type="text">
+              <br>
+              <br>
+              <button id="addPeletongButton">Legg til</button>
+              <p id="errorMessagePeletong"></p>
+              <table id="peletongTable">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Antall Brukere</th>
+                  </tr>
+                </thead>
+              </table>
+              <p id="errorMessagePeletongRemove"></p>
             </div>
         </div>
-        <div id="settingsOverlay" class="overlay">
-            <div class="overlay-content">
-                <h1>Endre innstillinger</h1>
-                <p>Navn: <input id="changeName" type="text"></p>
-                <p>Telefon: <input id="changePhone" type="text"></p>
-                <p id="messageSettings"></p>
-                 <div class="buttons">
-                     <button id="changeSettings" onclick=" userInfo()">Large</button>
-                     <button id="exitSettings">Exit</button>
-               </div>
+        <div class="bottom">
+          <div class="filters">
+            <div class="button">
+              <button onclick="changeUsers('usersGodkjent', 'usersIkkeGodkjent')">Godkjente Bruker</button>
+              <button onclick="changeUsers('usersIkkeGodkjent', 'usersGodkjent')">Ikke Godkjente Bruker</button>
             </div>
+            <div style="display: block;" id="usersGodkjent">
+              <h2>Godkjente brukere</h2>
+              <div class="users"></div>
+            </div>
+            <div style="display: none;" id="usersIkkeGodkjent">
+              <h2>Ikke godkjente bruker</h2>
+              <div class="users"></div>
+            </div>
+          </div>
         </div>
-        <div class="content">
-           <div class="top">
-              <div class="userInfo">
-                <h1>Velkommen <span id="userName"></span></h1>
-                <p>Du er ledere for kompani <span id="kompaniName"></span>.</p>
-                <p>Kompaniet ditt har <span id="usersAmount"></span> medlemmer.</p>
-                <p>Den har <span id="amountActive"></span> godkjente brukere.</p>
-                <p>Og den har <span id="amountNotActive"></span> ikke godkjente bruker.</p>
-                <p>Kompaniet har <span id="peletongAmount"></span> peletonger.</p>
-                <p>Ditt telefon number er <span id="telefonValue"></span></p>
-              </div>
-              <div class="lederPeletong">
-                 <h1>Legg til Peletong</h1>
-                 <label for="lederAddPeletong">Navn:</label>
-                 <input id="lederAddPeletong" type="text"><br>
-                 <br><button>Legg til</button>
-                 <table id="peletongTable">
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Antall Brukere</th>
-                        </tr>
-                    </thead>
-                 </table>
-                 <p id="addPeletongError"></p>
-              </div>
-           </div>
-           <div class="bottom">
-              <div class="filters"></div>
-           </div>
-        </div>
-    </div>
-</body>
-<script>
+        <script>
+            function changeUsers(show, hide){
+                document.getElementById(show).style.display = "block";
+                document.getElementById(hide).style.display = "none";
+            }
     async function userInfo(){
         let response = await fetch('/userInfo')
         let data = await response.json()
@@ -86,7 +106,70 @@
     async function getUsersLeder(){
         let response = await fetch('/getUsersLeder')
         let data = await response.json()
+        data.forEach(user => {
+            if (user.userstatus === "True") {
+                let userDiv = `
+                <div>
+                    <h3>Navn: ${user.name}</h3>
+                    <p>Telefon: ${user.telephone}</p>
+                    <p>Kompani: ${user.kompani}</p>
+                    <p>Peletong: ${user.peletong}</p>
+                    <p>Role: ${user.role}</p>
+                    <p>Kjønn: ${user.gender}</p>
+                    <button onclick="(userDelete('${user.name}'))(event)">Fjern Brukere</button>
+                </div>
+                `
+                document.querySelector("#usersGodkjent .users").innerHTML += userDiv;
+            } else if (user.userstatus === "False") {
+                let userDiv = `
+                <div>
+                    <h3>Navn: ${user.name}</h3>
+                    <p>Telefon: ${user.telephone}</p>
+                    <p>Kompani: ${user.kompani}</p>
+                    <p>Peletong: ${user.peletong}</p>
+                    <p>Role: ${user.role}</p>
+                    <p>Kjønn: ${user.gender}</p>
+                    <button onclick="(userDelete('${user.name}'))(event)">Fjern Brukere</button>
+                    <button onclick="(userActivate('${user.name}'))(event)">Godkjenn</button>
+                </div>
+                `
+                document.querySelector("#usersIkkeGodkjent .users").innerHTML += userDiv;
+            }
+        });
     }
+    
+    function userDelete(userName) {
+            return async function(event) {
+               event.preventDefault();
+               const deleteUser = {
+                 name: userName
+                };
+
+                const requestOptions = {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(deleteUser)
+                };
+                 const response = await fetch('/deleteUser', requestOptions);
+                 const data = await response.json();
+            }
+        };           
+    function userActivate(userName) {
+            return async function(event) {
+               event.preventDefault();
+               const activateUser = {
+                 name: userName
+                };
+
+                const requestOptions = {
+                  method: 'PUT',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(activateUser)
+                };
+                 const response = await fetch('/activateUser', requestOptions);
+                 const data = await response.json();
+            }
+        };
     async function getPeleton(){
             let response = await fetch('/getPeletongLeder')
             let peletongs = await response.json()
@@ -96,7 +179,7 @@
               row.insertCell().textContent = peletong.peletong;
               row.insertCell().textContent = peletong.amountUsers
               let deleteButton = document.createElement("button");
-              deleteButton.id = "deleteButtonPeltong"
+              deleteButton.id = "deleteButtonPeletong"
               deleteButton.textContent = "Delete";
               deleteButton.value = peletong.peletong;
               row.insertCell().appendChild(deleteButton);
@@ -104,6 +187,29 @@
             });
     }
 
+    document.getElementById('addPeletongButton').addEventListener('click', async function(event){
+            event.preventDefault(); 
+            const addPeletong = {
+                newPeletong: document.getElementById('lederAddPeletong').value,
+                kompani: "Leder"
+            };
+
+            const requestOptions = {
+                 method: 'POST',
+                 headers: { 'Content-Type': 'application/json' },
+                 body: JSON.stringify(addPeletong)
+            };
+           
+            const response = await fetch('/createPeletong', requestOptions);
+            const data = await response.json();
+            if (data.ErrorMessage) {
+                document.getElementById('errorMessagePeletong').innerText = data.ErrorMessage
+                setTimeout(function() {
+                    document.getElementById('errorMessagePeletong').innerText = "";
+                }, 5000); 
+            } 
+        }
+    )
     function peletongDelete(peletong) {
             return async function(event) {
                event.preventDefault();
@@ -118,9 +224,14 @@
                 };
                  const response = await fetch('/deletePeletong', requestOptions);
                  const data = await response.json();
-            }
+                 if (data.ErrorMessage) {
+                    document.getElementById('errorMessagePeletongRemove').innerText = data.ErrorMessage 
+                    setTimeout(function() {
+                        document.getElementById('errorMessagePeletongRemove').innerText = "";
+                    }, 5000); 
+                }
         };
-
+    }
     document.getElementById('logoutButton').addEventListener('click', async function(event) {
         event.preventDefault();
         let response = await fetch('/logout')

@@ -189,8 +189,21 @@ async function getUserInfo(request, response){
     response.send(users);
 }
 async function deleteKompanis(request, response) {
-    const user = request.body
-    removeKompanis(user.kompani)
+    const user = request.body;
+    const sql = db.prepare(`
+    SELECT COUNT(*) as count FROM users 
+    INNER JOIN kompanier ON users.kompani = kompanier.id
+    WHERE kompanier.kompani = ?
+    `);
+    let rows = sql.all(user.kompani);
+
+    if (rows[0].count > 0){
+        response.send({
+            ErrorMessage: `Can't delete kompani since it has users and peletongs!`
+        });
+    } else {
+        removeKompanis(user.kompani)
+    }
 }
 
 async function deletePeletongs(request, response) {
@@ -203,9 +216,8 @@ async function deletePeletongs(request, response) {
     let rows = sql.all(user.peletong);
 
     if (rows[0].count > 0){
-        console.log("Cant delete peletong since it has users")
         response.send({
-            ErrorMessage: `Cant delete peletong since it has users`
+            ErrorMessage: `Cant delete peletong since it has users!`
         });
     } else {
         removePeletongs(user.peletong)
@@ -228,13 +240,24 @@ async function createKompanis(request, response){
 async function createPeletongs(request, response){
     const user = request.body
     const sql = db.prepare('SELECT peletong_navn FROM peletonger WHERE peletong_navn = ? AND kompani_id = ?');
-    let rows = sql.all(user.newPeletong, user.kompani);
-    if (rows.length !== 0){
-        response.send({
-            ErrorMessage: `There is already a peltong in this kompani with this name`
-        });
-    } else {
-        addPeletong(user.newPeletong, user.kompani)
+    if (user.kompani === "Leder") {
+        let rows = sql.all(user.newPeletong, request.session.userKompani);
+        if (rows.length !== 0){
+            response.send({
+                ErrorMessage: `There is already a peletong with this name`
+            }); 
+        } else {
+            addPeletong(user.newPeletong, request.session.userKompani)
+        }
+    } else { 
+        let rows = sql.all(user.newPeletong, user.kompani);
+        if (rows.length !== 0){
+            response.send({
+                ErrorMessage: `There is already a peletong in this kompani with this name`
+            });
+        } else {
+            addPeletong(user.newPeletong, user.kompani)
+        }
     }
 }
 
@@ -250,7 +273,7 @@ async function deleteUsers(request){
 
 async function getUsersLeders(request, response) {
     const sql = db.prepare(`
-        SELECT users.name, roler.roles, kompanier.kompani, users.userType, users.telefon, users.gender, peletonger.peletong_navn, users.userStatus
+        SELECT users.uuid, users.name, roler.roles, kompanier.kompani, users.userType, users.telefon, users.gender, peletonger.peletong_navn, users.userStatus
         FROM users 
         INNER JOIN kompanier ON users.kompani = kompanier.id 
         INNER JOIN roler ON users.role = roler.id 
@@ -259,6 +282,7 @@ async function getUsersLeders(request, response) {
     `);
     let rows = sql.all(request.session.userKompani);
     let users = rows.map(user => ({
+        uuid: user.uuid,
         name: user.name,
         telephone: user.telefon,
         gender: user.gender,

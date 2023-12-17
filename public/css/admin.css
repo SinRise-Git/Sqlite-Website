@@ -45,7 +45,7 @@ h3{
 }
 
 
-#errorMessageKompani, #errorMessagePeletong {
+#errorMessageKompani, #errorMessagePeletong, #errorMessagePeletongRemove, #errorMessageKompaniRemove {
     color: red;
     font-size: 13px;
     margin-left: 10px;
@@ -56,7 +56,7 @@ h3{
     margin-top: 10px;
 }
 
-#addPeletongButton {
+#addPeletongButton, #errorMessageKompaniRemove {
     margin-left: 10px;
 }
 

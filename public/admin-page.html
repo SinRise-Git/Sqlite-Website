@@ -80,6 +80,7 @@
                     </tr>
                 </thead>
             </table>
+            <p id="errorMessageKompaniRemove"></p>
         </div>
         <div class="addPeletong">
             <h3>Add Peletong</h3>
@@ -102,7 +103,7 @@
                     </tr>
                 </thead>
             </table>
-            <p id="errorMessagePeletongRemove">Error</p>
+            <p id="errorMessagePeletongRemove"></p>
         </div>
     </div>
     <script>
@@ -123,6 +124,9 @@
             const data = await response.json();
             if (data.ErrorMessage) {
                 document.getElementById('errorMessagePeletong').innerText = data.ErrorMessage
+                setTimeout(function() {
+                    document.getElementById('errorMessagePeletong').innerText = "";
+                }, 5000); 
             } 
             
 
@@ -143,6 +147,9 @@
             const data = await response.json();
             if (data.ErrorMessage) {
                 document.getElementById('errorMessageKompani').innerText = data.ErrorMessage
+                setTimeout(function() {
+                    document.getElementById('errorMessageKompani').innerText = "";
+                }, 5000); 
             } 
         })    
 
@@ -271,8 +278,14 @@
                 };
                  const response = await fetch('/deleteKompani', requestOptions);
                  const data = await response.json();
+                 if (data.ErrorMessage) {
+                    document.getElementById('errorMessageKompaniRemove').innerText = data.ErrorMessage
+                    setTimeout(function() {
+                        document.getElementById('errorMessageKompaniRemove').innerText = "";
+                    }, 5000); 
+                }
             }
-        };
+        }
         async function getRole(){
             let response = await fetch('/getRole')
             let roles = await response.json()
@@ -301,7 +314,7 @@
               row.insertCell().textContent = peletong.kompani;
               row.insertCell().textContent = peletong.amountUsers
               let deleteButton = document.createElement("button");
-              deleteButton.id = "deleteButtonPeltong"
+              deleteButton.id = "deleteButtonPeletong"
               deleteButton.textContent = "Delete";
               deleteButton.value = peletong.peletong;
               row.insertCell().appendChild(deleteButton);
@@ -335,6 +348,12 @@
                 };
                  const response = await fetch('/deletePeletong', requestOptions);
                  const data = await response.json();
+                 if (data.ErrorMessage) {
+                    document.getElementById('errorMessagePeletongRemove').innerText = data.ErrorMessage 
+                    setTimeout(function() {
+                        document.getElementById('errorMessagePeletongRemove').innerText = "";
+                    }, 5000); 
+                }
             }
         };
         document.getElementById('logoutButton').addEventListener('click', async function(event) {
