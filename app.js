@@ -58,6 +58,11 @@ function updateUser(name, telephone, uuid) {
     const info = sql.run(name, telephone, uuid)
 }
 
+function updateUserEdit(name, telephone, role, peletong, uuid) {
+    const sql = db.prepare("UPDATE users SET name = ?, telefon = ?, role = ?, peletong = ? WHERE uuid = ?");
+    const info = sql.run(name, telephone, role, peletong, uuid)
+}
+
 function removeUser(name){
     const sql = db.prepare("DELETE FROM users WHERE name = ?");
     const info = sql.run(name)
@@ -122,6 +127,8 @@ app.post("/loginUser", loginUsers)
 app.get("/userInfo", getUserInfo)
 
 app.put("/changeSettings", changeSettings)
+
+app.put("/editUser", editUser)
 
 app.get("/logout", logout)
 
@@ -188,6 +195,10 @@ async function getUserInfo(request, response){
     }));
     response.send(users);
 }
+
+
+
+
 async function deleteKompanis(request, response) {
     const user = request.body;
     const sql = db.prepare(`
@@ -273,7 +284,7 @@ async function deleteUsers(request){
 
 async function getUsersLeders(request, response) {
     const sql = db.prepare(`
-        SELECT users.uuid, users.name, roler.roles, kompanier.kompani, users.userType, users.telefon, users.gender, peletonger.peletong_navn, users.userStatus
+        SELECT users.uuid, users.name, users.role, roler.roles, kompanier.kompani, users.userType, users.telefon, users.gender, peletonger.peletong_navn, users.userStatus
         FROM users 
         INNER JOIN kompanier ON users.kompani = kompanier.id 
         INNER JOIN roler ON users.role = roler.id 
@@ -288,11 +299,11 @@ async function getUsersLeders(request, response) {
         gender: user.gender,
         userType: user.userType,
         role: user.roles,
+        role_id: user.role,
         kompani: user.kompani,
         peletong: user.peletong_navn,
         userstatus: user.userStatus
     }));
-    console.log(users)
     response.send(users);
 }
 
@@ -391,6 +402,7 @@ async function getPeletongLeders(request, response) {
     let rows = sql.all(request.session.userKompani);
     let peletongs = rows.map(peletong => (
         {
+            id: peletong.ID,
             peletong: peletong.peletong_navn,
             amountUsers: peletong.amountUsers,
         }
@@ -414,6 +426,22 @@ async function createUsers(request, response) {
     }
     
 }
+async function editUser(request, response) {
+    const user = request.body
+    const sql = db.prepare('SELECT name FROM users WHERE name = ? AND uuid != ?');
+    let rows = sql.all(user.name, user.uuid);
+    if (rows.length !== 0){
+        response.send({
+            ErrorMessage: `There is already a user with this name`
+        });
+    } else {
+        updateUserEdit(user.name, user.telephone, user.role, user.peletong, user.uuid)
+        response.send({
+            Message: `The changes has been saved`
+        });
+    }
+}
+
 
 async function changeSettings(request, response) {
     const user = request.body

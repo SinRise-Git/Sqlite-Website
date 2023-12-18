@@ -12,11 +12,29 @@
         <div class="user">
           <h1>Leder Page</h1>
         </div>
-        <div class="settings"></div>
         <div class="logout">
           <div class="buttons">
             <button id="settingButton">Bruker innstillinger</button>
             <button id="logoutButton">Logout</button>
+          </div>
+        </div>
+      </div>
+      <div id="editOverlay" class="overlay"> 
+        <div class="overlay-content-edit">
+          <h1>Rediger bruker</h1>
+          <p><span id="changeUuidEdit"></span></p>
+          <p>Navn: <input id="changeNameEdit" type="text"></p>
+          <p>Telefon: <input id="changePhoneEdit" type="text"></p>
+          <p>Role: <select name="roleEdit" id="roleEdit">
+          </select>
+          </p>
+          <p>Peletong: <select name="peletongEdit" id="peletongEdit">
+          </select>
+          </p>
+          <p id="messageSettingsEdit"></p>
+          <div class="buttons">
+            <button id="editUser" onclick="userInfoEdit()">Lagre</button>
+            <button id="exitEdit">Exit</button>
           </div>
         </div>
       </div>
@@ -29,7 +47,7 @@
           </p>
           <p id="messageSettings"></p>
           <div class="buttons">
-            <button id="changeSettings" onclick=" userInfo()">Large</button>
+            <button id="changeSettings" onclick="userInfo()">Large</button>
             <button id="exitSettings">Exit</button>
           </div>
         </div>
@@ -104,6 +122,7 @@
     }
 
     async function getUsersLeder(){
+        document.querySelector("#usersGodkjent .users").innerHTML = '';
         let response = await fetch('/getUsersLeder')
         let data = await response.json()
         data.forEach(user => {
@@ -116,6 +135,7 @@
                     <p>Peletong: ${user.peletong}</p>
                     <p>Role: ${user.role}</p>
                     <p>Kjønn: ${user.gender}</p>
+                    <button onclick="(userEdit('${user.name}', '${user.telephone}', '${user.uuid}'))(event)">Rediger</button>
                     <button onclick="(userDelete('${user.name}'))(event)">Fjern Brukere</button>
                 </div>
                 `
@@ -129,15 +149,16 @@
                     <p>Peletong: ${user.peletong}</p>
                     <p>Role: ${user.role}</p>
                     <p>Kjønn: ${user.gender}</p>
-                    <button onclick="(userDelete('${user.name}'))(event)">Fjern Brukere</button>
                     <button onclick="(userActivate('${user.name}'))(event)">Godkjenn</button>
+                    <button onclick="(userDelete('${user.name}'))(event)">Fjern Brukere</button>
                 </div>
                 `
                 document.querySelector("#usersIkkeGodkjent .users").innerHTML += userDiv;
             }
+            userInfo()
+            getPeleton()
         });
     }
-    
     function userDelete(userName) {
             return async function(event) {
                event.preventDefault();
@@ -170,10 +191,69 @@
                  const data = await response.json();
             }
         };
+    function userEdit(user, telefon, uuid) {
+          return async function (event) {
+             let peletongTable = document.getElementById('peletongEdit')
+             let overlayEdit = document.getElementById("editOverlay");
+             overlayEdit.style.display = "block";
+             document.getElementById('changeUuidEdit').textContent = uuid;
+             document.getElementById('changeNameEdit').placeholder = user;
+             document.getElementById('changePhoneEdit').placeholder = telefon;
+      }
+    }
+
+    async function userInfoEdit(){
+            let changeNameInput = document.getElementById("changeNameEdit");
+            let changePhoneInput = document.getElementById("changePhoneEdit");
+            let roleInput = document.getElementById("roleEdit");
+            let peletongInput = document.getElementById("peletongEdit");
+
+            let uuid = document.getElementById("changeUuidEdit").textContent;
+            let newName = changeNameInput.value !== "" ? changeNameInput.value : changeNameInput.placeholder;
+            let newPhone = changePhoneInput.value !== "" ? changePhoneInput.value : changePhoneInput.placeholder;
+            let newRole = roleInput.value;
+            let newPeletong = peletongInput.value;
+
+            const updateUser = {
+                uuid: uuid,
+                name: newName,
+                telephone: newPhone,
+                role: newRole,
+                peletong: newPeletong
+            };
+
+            const requestOptions = {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updateUser)
+            };
+            const response = await fetch('/editUser', requestOptions);
+            const data = await response.json(); 
+            if (data.ErrorMessage) {
+             document.getElementById('messageSettingsEdit').innerText = data.ErrorMessage
+             document.getElementById('messageSettingsEdit').style.color = "red"
+            } else if (data.Message) {
+             document.getElementById('messageSettingsEdit').innerText = data.Message
+             document.getElementById('messageSettingsEdit').style.color = "green"
+             document.getElementById("changeNameEdit").value = "";
+             document.getElementById("changePhoneEdit").value = "";
+            } 
+            userEdit(newName, newPhone, uuid)();
+            getUsersLeder()
+            getPeleton()
+    }
+  
     async function getPeleton(){
             let response = await fetch('/getPeletongLeder')
             let peletongs = await response.json()
             let peletongTable = document.getElementById("peletongTable")
+            let peletongFilter = document.getElementById('peletongEdit')
+            while (peletongTable.rows.length > 1) {
+                peletongTable.deleteRow(1);
+            }
+            while (peletongFilter.options.length > 0) {
+                peletongFilter.remove(0);
+            }
             peletongs.forEach(peletong => {
               let row = peletongTable.insertRow()
               row.insertCell().textContent = peletong.peletong;
@@ -184,8 +264,23 @@
               deleteButton.value = peletong.peletong;
               row.insertCell().appendChild(deleteButton);
               deleteButton.addEventListener('click', peletongDelete(peletong.peletong));
+              let optionPeletong = document.createElement("option");
+              optionPeletong.value =  peletong.id;
+              optionPeletong.textContent = peletong.peletong;
+              peletongFilter.appendChild(optionPeletong);  
             });
     }
+    async function getRole(){
+            let response = await fetch('/getRole')
+            let roles = await response.json()
+            let roleTable = document.getElementById("roleEdit");
+            roles.forEach(role => {
+                let option = document.createElement("option");
+                option.value = role.id;
+                option.textContent = role.role;
+                roleTable.appendChild(option);
+            });
+        }
 
     document.getElementById('addPeletongButton').addEventListener('click', async function(event){
             event.preventDefault(); 
@@ -269,34 +364,48 @@
             document.getElementById("changePhone").value = "";
         }
     })
-  
-
-
-    let overlay = document.getElementById("settingsOverlay");
+    
+    let overlaySetting = document.getElementById("settingsOverlay");
     let btn = document.getElementById("settingButton");
     let exit = document.getElementById("exitSettings");
-
+    let overlayEdit = document.getElementById("editOverlay");
+    let exitEdit = document.getElementById("exitEdit");
+    
     btn.onclick = function() {
-        overlay.style.display = "block";
+       overlaySetting.style.display = "block";
     } 
+     
 
     exit.onclick = function() {
-        overlay.style.display = "none";
+        overlaySetting.style.display = "none";
         document.getElementById("changeName").value = "";
         document.getElementById("changePhone").value = "";
         document.getElementById('messageSettings').innerText = ""
     }
 
+    exitEdit.onclick = function() {
+        overlayEdit.style.display = "none";
+        document.getElementById("changeNameEdit").value = "";
+        document.getElementById("changePhoneEdit").value = "";
+        document.getElementById('messageSettingsEdit').innerText = ""
+    }
+
     window.onclick = function(event) {
-    if (event.target == overlay) {
-        overlay.style.display = "none";
+    if (event.target == overlaySetting) {
+        overlaySetting.style.display = "none";
         document.getElementById("changeName").value = "";
         document.getElementById("changePhone").value = "";
-        document.getElementById('messageSettings').innerText = ""
+        document.getElementById('messageSettings').innerText = "";
+    } else if (event.target == overlayEdit) {
+        overlayEdit.style.display = "none";
+        document.getElementById("changeNameEdit").value = "";
+        document.getElementById("changePhoneEdit").value = "";
+        document.getElementById('messageSettingsEdit').innerText = ""
     }
     }
     userInfo()
     getPeleton()
+    getRole()
     getUsersLeder()
 </script>
 </html>

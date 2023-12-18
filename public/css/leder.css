@@ -2,10 +2,13 @@ body {
     margin: 0px;
 }
 
+h1{
+    font-size: 1.2vw;
+}
 
 h3 {
     color: white;
-    font-size: 20px;
+    font-size: 1vw;
 }
 
 .content{
@@ -36,9 +39,13 @@ h3 {
    border: 0px solid;
    background-color: transparent;
    cursor: pointer;
-   font-size: 20px;
+   font-size: 2vh;
 }
 
+.lederPeletong table{
+    font-size: 1.6vh;
+    overflow: auto;
+}
 
 .top{
     display: flex;
@@ -51,15 +58,21 @@ h3 {
 }
 
 
-.top .userInfo, .lederPeletong {
+.userInfo, .lederPeletong {
     background-color: black;
-    padding: 20px 40px 20px 40px;
+    padding: 10px 40px 10px 40px;
     border-radius: 10px;
-    height: 300px;
+    max-height: 33.3vh;
+    overflow: auto;
+    
 }
 
 .top p {
-    font-size: 1rem;
+    font-size: 1.95vh;
+}
+
+.lederPeletong label {
+    font-size: 0.8vw ;
 }
 
 .overlay {
@@ -74,7 +87,7 @@ h3 {
     background-color: rgba(0,0,0,0.4); 
 }
 
-.overlay-content {
+.overlay-content, .overlay-content-edit {
     background-color: #121212;
     padding: 20px;
     color: white;
@@ -86,7 +99,14 @@ h3 {
     border-radius: 10px;
 }
 
-.overlay-content button{
+.overlay-content-edit, select {
+    color: white;
+    background-color: #121212;
+    border: 1px solid white;
+    border-radius: 5px;
+}
+
+.overlay-content button, .overlay-content-edit button{
     background-color: black;
     color: white;
     border: 0px solid;
@@ -95,10 +115,11 @@ h3 {
     cursor: pointer;
 }
 
-.overlay-content input{
+.overlay-content input, .overlay-content-edit input{
     background-color: black;
     border: 1px solid white;
     border-radius: 5px;
+    color: white;
 }
 
 
@@ -108,14 +129,10 @@ h3 {
     text-decoration: none;
     cursor: pointer;
 }
-    
-#messageSettings{
+
+#errorMessagePeletongRemove, #messageSettingsEdit, #messageSettings {
     color: red;
     font-size: 13px;
-}
-
-#errorMessagePeletongRemove {
-    color: red;
 }
 
 .lederPeletong button{
@@ -126,7 +143,8 @@ h3 {
     padding: 10px;
     cursor: pointer;
     font-weight: bolder;
-    font-size: 16px;
+    font-size: 0.7vw;
+    
 }
 
 .lederPeletong input{
@@ -134,13 +152,9 @@ h3 {
     border: 1px solid white;
     border-radius: 5px;
     color: white;
-    padding: 3px
+    height: 0.8vw;
 }
 
-.lederPeletong label{
-    color: color(srgb red green blue);
-    font-size: 20px;
-}
 
 .confirmAccounts{
     padding: 1px;
@@ -154,10 +168,6 @@ h3 {
     padding: 5px;
 }
 
-#peletongTable {
-    margin-top: 10px;;
-}
-
 .bottom {
     background-color: black;
     height: 53vh;
@@ -165,14 +175,12 @@ h3 {
     z-index: 1;
 }
 
-
-
 .bottom .button {
     display: flex;
     justify-content: center;
     align-items: center;
     flex-direction: row;
-    padding-top: 20px;
+    padding-top: 5px;
 }
 
 .bottom .button button {
@@ -182,7 +190,7 @@ h3 {
     color: white;
     border-radius: 10px;
     border: 0px solid;
-    font-size: 18px;
+    font-size: 1.8vh;
     cursor: pointer;
 }
 #usersGodkjent .users, #usersIkkeGodkjent, .users{
@@ -191,19 +199,20 @@ h3 {
 }
 
 #usersGodkjent .users p, #usersIkkeGodkjent .users p{
-    font-size: 20px;
+    font-size: 2vh;
     color: white;
 }
 #usersGodkjent .users h3, #usersIkkeGodkjent .users h3{
-    font-size: 20px;
+    font-size: 2vh;
     color: white;
     align-self: start;
 }
 
 #usersGodkjent h2, #usersIkkeGodkjent h2{
-    font-size: 20px;
+    font-size: 2vh;
     color: white;
     margin-left: 20px;
+    margin: 5px 0px 5px 0px;
     text-align: center;
 }
 
@@ -223,5 +232,6 @@ h3 {
     padding: 10px;
     cursor: pointer;
     font-weight: bolder;
+    font-size: 1.6vh;
 }
 
