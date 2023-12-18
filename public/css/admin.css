@@ -3,32 +3,65 @@ body {
 }
 
 .showUsers tr, #kompaniTable tr, #peletongTable tr {
-    text-align: center;
+    font-size: 20px;
 }
 
 .showUsers th, #kompaniTable th, #peletongTable th  {
     padding: 10px 10px 10px 10px;
 }
-
-.showUsers{
-    margin-left: 10px
+.top {
+    justify-content: center;
+    background-color: black;
+    color: white;
+    text-align: center;
+    padding: 20px;
+    border-radius: 10px;
+    max-height: 43vh;
+    overflow: auto;
 }
 
-.showUsers, label {
-    margin-left: 10px
+.filters .search {
+    margin-bottom: 16px;
+}
+
+.filters label {
+    font-weight: bolder;
+}
+
+.filters input {
+    border-radius: 5px;
+    background-color: #121212;
+    border: 1px solid white;
+    color: white;
+}
+
+.filters select {
+    border-radius: 5px;
+    background-color: #121212;
+    border: 0px solid;
+    color: white;
+    margin: 5px;
 }
 
 h2 {
     font-size: 40px;
-    margin-left: 10px
+    margin: 0px;
 }
 
-.showUsers select{
-    margin-left: 10px
-}
 
 .addKompani, .addPeletong{
     margin-left: 20px;
+}
+
+.showUsers {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.showUsers table {
+    margin: auto;
 }
 
 h3{
@@ -66,6 +99,7 @@ h3{
     justify-content: space-between;
     padding: 0px 20px 0px 20px;
     margin: 0px;
+    height: 7vh;
     color: white;
     background-color: black
 
@@ -80,4 +114,60 @@ h3{
    background-color: transparent;
    cursor: pointer;
    font-size: 20px;
+}
+
+.bottom{
+    display: flex;
+    justify-content: center;
+    color: white; 
+    height: 43vh;
+}
+
+.bottom .addKompani, .bottom .addPeletong{
+    background-color: black;
+    padding: 10px 40px 10px 40px;
+    border-radius: 10px;
+    margin-top: 20px;  
+    overflow: auto;
+}
+
+th {
+    text-align: center;
+}
+
+.addKompani td, .addPeletong td {
+    text-align: center;
+}
+
+.addKompani input, .addPeletong input {
+    border-radius: 5px;
+    background-color: #121212;
+    border: 1px solid white;
+    color: white;
+}
+
+.addKompani select, .addPeletong select {
+    border-radius: 5px;
+    background-color: #121212;
+    border: 0px solid;
+    color: white;
+    margin: 5px;
+}
+
+.addKompani button, .addPeletong button {
+    border-radius: 5px;
+    background-color: #121212;
+    border: 0px solid;
+    color: white;
+    padding: 10px 20px 10px 20px;
+}   
+
+
+.top button {
+    border-radius: 5px;
+    background-color: #121212;
+    border: 0px solid;
+    color: white;
+    padding: 10px 20px 10px 20px;
+
 }

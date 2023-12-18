@@ -43,7 +43,7 @@ h3 {
 }
 
 .lederPeletong table{
-    font-size: 1.6vh;
+    font-size: 1.8vh;
     overflow: auto;
 }
 
@@ -186,7 +186,7 @@ h3 {
 
 .bottom .button button {
     padding: 10px 20px 10px 20px;
-    margin: 10px 10px 0px 10px;
+    margin: 10px 10px 10px 10px;
     background-color: #121212;
     color: white;
     border-radius: 10px;
@@ -197,6 +197,7 @@ h3 {
 #usersGodkjent .users, #usersIkkeGodkjent, .users{
     display: flex;
     justify-content: center;
+    flex-wrap: wrap;
 }
 
 #usersGodkjent .users p, #usersIkkeGodkjent .users p{

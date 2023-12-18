@@ -190,9 +190,10 @@
                 role: document.getElementById('userOption').value === 'Foreldre' || document.getElementById('userOption').value === 'Leder' ? "6" : document.getElementById('roleOption').value,
                 kompani: document.getElementById('userOption').value === 'Foreldre' ? "1" : document.getElementById('komaniOption').value,
                 peletong: document.getElementById('userOption').value === 'Foreldre' || document.getElementById('userOption').value === 'Leder' ? "1" : document.getElementById('peletongOption').value,
-                gender: document.getElementById('genderOption').value,
+                gender: document.getElementById('genderOption').value, 
+                family: document.getElementById('userOption').value === 'Foreldre' ? document.getElementById('childOption').value : "Empty",
+                
             };
-            console.log(createUser)
 
             const requestOptions = {
                  method: 'POST',
@@ -209,9 +210,9 @@
         
 
         })    
-        getRole();
         getKompani();
-        getPeletong(); 
+        getPeletong()
+        getRole();
         getChild();
     </script>
 </body>

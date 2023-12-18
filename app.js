@@ -5,6 +5,7 @@ const bcrypt = require('bcrypt')
 const dotenv = require('dotenv')
 const session = require("express-session")
 const uuid = require('uuid')    
+const { fail } = require("assert")
 
 dotenv.config();
 
@@ -48,16 +49,20 @@ app.get('/medlem-page.html', checkAuthorization(['Medlem']), (request, response)
 app.use(express.static(staticPath));
 
 
-function insertUser(name, password, userType, role, kompani, peletong, telephone, uuid, gender) {
-    const sql = db.prepare("INSERT INTO users (name, password, userType, role, kompani, peletong, userStatus, uuid, telefon, gender) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
-    const info = sql.run(name, password, userType, role, kompani, peletong, "False", uuid, telephone, gender)
+function insertUser(name, password, userType, role, kompani, peletong, telephone, uuid, gender, family) {
+    const sql = db.prepare("INSERT INTO users (name, password, userType, role, kompani, peletong, userStatus, uuid, telefon, gender, family) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+    const info = sql.run(name, password, userType, role, kompani, peletong, "False", uuid, telephone, gender, family)
 }
 
 function updateUser(name, telephone, uuid) {
     const sql = db.prepare("UPDATE users SET name = ?, telefon = ? WHERE uuid = ?");
     const info = sql.run(name, telephone, uuid)
-}
+} 
 
+function updateUserMedlem(name, telephone, peletong, role, uuid) {
+    const sql = db.prepare("UPDATE users SET name = ?, telefon = ?, peletong = ?, role = ? WHERE uuid = ?");
+    const info = sql.run(name, telephone, peletong, role, uuid)
+}
 function updateUserEdit(name, telephone, role, peletong, uuid) {
     const sql = db.prepare("UPDATE users SET name = ?, telefon = ?, role = ?, peletong = ? WHERE uuid = ?");
     const info = sql.run(name, telephone, role, peletong, uuid)
@@ -110,6 +115,8 @@ app.get("/getUsersAdmin", getUsersAdmins)
 
 app.get("/getUsersLeder", getUsersLeders)
 
+app.get("/getFamilyForesporsels", getFamilyForesporsels)
+
 app.post("/deleteUser", deleteUsers)
 
 app.put("/activateUser", activateUsers)
@@ -128,13 +135,15 @@ app.get("/userInfo", getUserInfo)
 
 app.put("/changeSettings", changeSettings)
 
+app.put("/changeSettingsMedlem", changeSettingsMedlem)
+
 app.put("/editUser", editUser)
 
 app.get("/logout", logout)
 
 async function loginUsers(request, response) {
     const user = request.body;
-    const sqlUserType = db.prepare('SELECT userType, uuid, kompani, password, userStatus FROM users WHERE name = ?');
+    const sqlUserType = db.prepare('SELECT name, userType, uuid, kompani, password, userStatus FROM users WHERE name = ?');
     let rows = sqlUserType.all(user.name);
 
     if (rows.length === 0) {
@@ -158,6 +167,7 @@ async function loginUsers(request, response) {
                     request.session.loggedIn = storedUser.userType;
                     request.session.userUuid = storedUser.uuid
                     request.session.userKompani = storedUser.kompani;
+                    request.session.userName = storedUser.name;
                     response.send({ 
                         redirectUrl: `/${storedUser.userType.toLowerCase()}-page.html`
                     });
@@ -174,20 +184,28 @@ async function loginUsers(request, response) {
 
 async function getUserInfo(request, response){
     const sql = db.prepare(`
-       SELECT users.name, kompanier.kompani, users.telefon,
+       SELECT users.name, kompanier.kompani, users.telefon, peletonger.peletong_navn, users.peletong, roler.roles, users.role,
             (SELECT COUNT(DISTINCT peletonger.id) FROM peletonger WHERE peletonger.kompani_id = users.kompani) AS amountPeletongs,
             (SELECT COUNT(DISTINCT users.id) FROM users WHERE users.kompani = kompanier.id AND users.usertype = 'Medlem') AS amountUsers,
+            (SELECT COUNT(DISTINCT users.id) FROM users WHERE users.peletong = peletonger.id AND users.userStatus = 'True' AND users.usertype = 'Medlem') AS amountUsersPeletong,
             (SELECT COUNT(DISTINCT users.id) FROM users WHERE users.kompani = kompanier.id AND users.userStatus = 'True' AND users.usertype = 'Medlem') AS amountUsersActive,
             (SELECT COUNT(DISTINCT users.id) FROM users WHERE users.kompani = kompanier.id AND users.userStatus = 'False' AND users.usertype = 'Medlem') AS amountUsersNotActive
        FROM users 
        INNER JOIN kompanier ON users.kompani = kompanier.id 
+       INNER JOIN roler ON users.role = roler.id 
+       INNER JOIN peletonger ON users.peletong = peletonger.id
        WHERE users.uuid = ?
     `)
     let rows = sql.all(request.session.userUuid)
     let users = rows.map(user => ({
         name: user.name,
+        role: user.roles,
+        role_id : user.role,
+        peletong: user.peletong_navn,
+        peletong_id: user.peletong,
         kompani: user.kompani,
         amountUsers: user.amountUsers,
+        amountUsersPeletong: user.amountUsersPeletong,
         amountUsersActive: user.amountUsersActive,
         amountUsersNotActive: user.amountUsersNotActive,
         amountPeletongs: user.amountPeletongs,
@@ -309,7 +327,7 @@ async function getUsersLeders(request, response) {
 
 async function getUsersAdmins(request, response){
     const sql = db.prepare(`
-        SELECT users.name, users.userType, roler.roles, kompanier.kompani, users.userStatus, users.telefon, users.gender, peletonger.peletong_navn 
+        SELECT users.name, users.userType, roler.roles, kompanier.kompani, users.userStatus, users.telefon, users.gender, peletonger.peletong_navn, users.family
         FROM users 
         INNER JOIN kompanier ON users.kompani = kompanier.id 
         INNER JOIN roler ON users.role = roler.id 
@@ -325,7 +343,8 @@ async function getUsersAdmins(request, response){
         role: user.roles,
         kompani: user.kompani,
         peletong: user.peletong_navn,
-        userstatus: user.userStatus
+        userstatus: user.userStatus,
+        family: user.family
     }));
     response.send(users);
 }
@@ -357,6 +376,17 @@ async function getKompanis(request, response) {
         amountUsers: kompani.amountUsers,
     }));
     response.send(kompanis);
+}
+
+async function getFamilyForesporsels(request, response){
+    const sql = db.prepare("SELECT name, telefon, family FROM users WHERE family = ? AND userStatus = 'False'");
+    let rows = sql.all(request.session.userName);
+    let familys = rows.map(family => ({
+        name: family.name,
+        telephone: family.telefon,
+        family: family.family,
+    }));
+    response.send(familys);
 }
 
 
@@ -421,7 +451,7 @@ async function createUsers(request, response) {
     } else {
         const hashPassword = bcrypt.hashSync(user.password, 10)
         const UUID = uuid.v4();
-        insertUser(user.name, hashPassword, user.userType, user.role, user.kompani, user.peletong, user.telephone, UUID, user.gender, );
+        insertUser(user.name, hashPassword, user.userType, user.role, user.kompani, user.peletong, user.telephone, UUID, user.gender, user.family);
         response.send({ redirectUrl: `/login-page.html` });
     }
     
@@ -459,10 +489,27 @@ async function changeSettings(request, response) {
     }
 }
 
+async function changeSettingsMedlem(request, response) {
+    const user = request.body
+    const sql = db.prepare('SELECT name FROM users WHERE name = ? AND uuid != ?');
+    let rows = sql.all(user.name, request.session.userUuid);
+    if (rows.length !== 0){
+        response.send({
+            ErrorMessage: `There is already a user with this name`
+        });
+    } else {
+        updateUserMedlem(user.name, user.telephone, user.peletong, user.role, request.session.userUuid)
+        response.send({
+            Message: `The changes has been saved`
+        });
+    }
+}
+
 async function logout(request, response) {
     request.session.loggedIn = undefined
     request.session.userUuid = undefined
     request.session.userKompani = undefined
+    request.session.userName = undefined;
     response.send({ 
         redirectUrl: `/login-page.html`
     });

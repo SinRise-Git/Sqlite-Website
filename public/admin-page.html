@@ -17,12 +17,15 @@
             </div>
         </div>
         <div class="showUsers">
+            <div class="top">
             <h2>Show Users</h2>
             <p>Antall brukere: (<span id="antall-brukere"></span>)</p>
             <table id="usersTable">
                 <div class="filters">
-                    <label for="nameSearch">Search</label>
-                    <input id="nameSearch" type="text" onchange="getUserAdmin()">
+                    <div class="search">
+                        <label for="nameSearch">Search</label>
+                        <input id="nameSearch" type="text" onchange="getUserAdmin()">
+                    </div>
                     <label for="filterRole">Role:</label>
                     <select name="filterRole" id="filterRole" onchange="getUserAdmin()">
                         <option value="All">All</option>
@@ -59,10 +62,13 @@
                         <th>Kompani</th>
                         <th>Peletong</th>
                         <th>User Status</th>
+                        <th>Family</th>
                     </tr>
                 </thead>
             </table>
+         </div>
         </div>
+        <div class="bottom"> 
         <div class="addKompani">
              <h3>Add Kompani</h3>
             <form >
@@ -104,6 +110,7 @@
                 </thead>
             </table>
             <p id="errorMessagePeletongRemove"></p>
+        </div>
         </div>
     </div>
     <script>
@@ -186,6 +193,7 @@
                     row.insertCell().textContent = user.kompani;
                     row.insertCell().textContent = user.peletong
                     row.insertCell().textContent = user.userstatus;
+                    row.insertCell().textContent = user.family;
                     let activateButton = document.createElement("button");
                     activateButton.id = "activateButton"
                     activateButton.textContent = "Activate";

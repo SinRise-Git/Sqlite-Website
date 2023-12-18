@@ -90,33 +90,32 @@
               <button onclick="changeUsers('usersGodkjent', 'usersIkkeGodkjent')">Godkjente Bruker</button>
               <button onclick="changeUsers('usersIkkeGodkjent', 'usersGodkjent')">Ikke Godkjente Bruker</button>
             </div>
+            <div class="userFilters">
+              <label for="peletongFilter">Peletong:</label>
+              <select id="peletongFilter" onchange="getUsersLeder()">
+                <option value="All">All</option>
+              </select>
+              <label for="roleFilter">Role:</label>
+              <select id="roleFilter" onchange="getUsersLeder()">
+                <option value="All">All</option>
+             </select>
+            </div>
             <div style="display: block;" id="usersGodkjent">
-              <h2>Godkjente brukere</h2>
-              <div class="userFilters">
-                <label for="peletongFilter">Peletong:</label>
-                <select id="peletongFilter">
-                  <option value="All">All</option>
-                </select>
-                <label for="roleFilter">Role:</label>
-                <select id="roleFilter">
-                  <option value="All">All</option>
-               </select>
-              </div>
+              <h2>Godkjente brukere (<span id="totalGodkjent">0</span>)</h2>
               <div class="users">
-
               </div>
             </div>
             <div style="display: none;" id="usersIkkeGodkjent">
-              <h2>Ikke godkjente bruker</h2>
+              <h2>Ikke godkjente bruker (<span id="totalIkkeGodkjent">0</span>)</h2>
               <div class="users"></div>
             </div>
           </div>
         </div>
         <script>
-            function changeUsers(show, hide){
-                document.getElementById(show).style.display = "block";
-                document.getElementById(hide).style.display = "none";
-            }
+    function changeUsers(show, hide){
+        document.getElementById(show).style.display = "block";
+        document.getElementById(hide).style.display = "none";
+    }
     async function userInfo(){
         let response = await fetch('/userInfo')
         let data = await response.json()
@@ -134,41 +133,52 @@
     }
 
     async function getUsersLeder(){
-        document.querySelector("#usersGodkjent .users").innerHTML = '';
-        let response = await fetch('/getUsersLeder')
-        let data = await response.json()
-        data.forEach(user => {
-            if (user.userstatus === "True") {
-                let userDiv = `
-                <div>
-                    <h3>Navn: ${user.name}</h3>
-                    <p>Telefon: ${user.telephone}</p>
-                    <p>Kompani: ${user.kompani}</p>
-                    <p>Peletong: ${user.peletong}</p>
-                    <p>Role: ${user.role}</p>
-                    <p>Kjønn: ${user.gender}</p>
-                    <button onclick="(userEdit('${user.name}', '${user.telephone}', '${user.uuid}'))(event)">Rediger</button>
-                    <button onclick="(userDelete('${user.name}'))(event)">Fjern Brukere</button>
-                </div>
-                `
-                document.querySelector("#usersGodkjent .users").innerHTML += userDiv;
-            } else if (user.userstatus === "False") {
-                let userDiv = `
-                <div>
-                    <h3>Navn: ${user.name}</h3>
-                    <p>Telefon: ${user.telephone}</p>
-                    <p>Kompani: ${user.kompani}</p>
-                    <p>Peletong: ${user.peletong}</p>
-                    <p>Role: ${user.role}</p>
-                    <p>Kjønn: ${user.gender}</p>
-                    <button onclick="(userActivate('${user.name}'))(event)">Godkjenn</button>
-                    <button onclick="(userDelete('${user.name}'))(event)">Fjern Brukere</button>
-                </div>
-                `
-                document.querySelector("#usersIkkeGodkjent .users").innerHTML += userDiv;
-            }
-        });
-    }
+    let countGodkjent = 0;
+    let countIkkeGodkjent = 0;
+    let selectedRole = document.getElementById('roleFilter').value;
+    let selectedKompani = document.getElementById('peletongFilter').value;
+    document.querySelector("#usersGodkjent .users").innerHTML = '';
+    document.querySelector("#usersIkkeGodkjent .users").innerHTML = '';
+    let response = await fetch('/getUsersLeder')
+    let data = await response.json()
+    data.forEach(user => {
+      if ((selectedRole === "All" || user.role === selectedRole) &&
+        (selectedKompani === "All" || user.peletong === selectedKompani)){
+        if (user.userstatus === "True") {
+            countGodkjent += 1;
+            let userDiv = `
+            <div>
+                <h3>Navn: ${user.name}</h3>
+                <p>Telefon: ${user.telephone}</p>
+                <p>Kompani: ${user.kompani}</p>
+                <p>Peletong: ${user.peletong}</p>
+                <p>Role: ${user.role}</p>
+                <p>Kjønn: ${user.gender}</p>
+                <button onclick="(userEdit('${user.name}', '${user.telephone}', '${user.uuid}'))(event)">Rediger</button>
+                <button onclick="(userDelete('${user.name}'))(event)">Fjern Brukere</button>
+            </div>
+            `
+            document.querySelector("#usersGodkjent .users").innerHTML += userDiv;
+        } else if (user.userstatus === "False") {
+            countIkkeGodkjent += 1;
+            let userDiv = `
+            <div>
+                <h3>Navn: ${user.name}</h3>
+                <p>Telefon: ${user.telephone}</p>
+                <p>Kompani: ${user.kompani}</p>
+                <p>Peletong: ${user.peletong}</p>
+                <p>Role: ${user.role}</p>
+                <p>Kjønn: ${user.gender}</p>
+                <button onclick="(userActivate('${user.name}'))(event)">Godkjenn</button>
+                <button onclick="(userDelete('${user.name}'))(event)">Fjern Brukere</button>
+            </div>
+            `
+            document.querySelector("#usersIkkeGodkjent .users").innerHTML += userDiv;
+        }
+    }});
+    document.getElementById("totalGodkjent").textContent = countGodkjent;
+    document.getElementById("totalIkkeGodkjent").textContent = countIkkeGodkjent;
+}
     function userDelete(userName) {
             return async function(event) {
                event.preventDefault();
@@ -256,10 +266,11 @@
     }
   
     async function getPeleton(){
-            let response = await fetch('/getPeletongLeder?_=' + new Date().getTime())
+            let response = await fetch('/getPeletongLeder')
             let peletongs = await response.json()
-            let peletongTable = document.getElementById("peletongTable")
+            let peletongTable = document.getElementById('peletongTable')
             let peletongFilter = document.getElementById('peletongEdit')
+            let peletongFilterUser = document.getElementById('peletongFilter')
             while (peletongTable.rows.length > 1) {
                 peletongTable.deleteRow(1);
             }
@@ -280,17 +291,26 @@
               optionPeletong.value =  peletong.id;
               optionPeletong.textContent = peletong.peletong;
               peletongFilter.appendChild(optionPeletong);  
+              let optionPeletongFilter = document.createElement("option");
+              optionPeletongFilter.value =  peletong.peletong;
+              optionPeletongFilter.textContent = peletong.peletong;
+              peletongFilterUser.appendChild(optionPeletongFilter);  
             });
     }
     async function getRole(){
             let response = await fetch('/getRole')
             let roles = await response.json()
             let roleTable = document.getElementById("roleEdit");
+            let roleFilter = document.getElementById('roleFilter')
             roles.forEach(role => {
                 let option = document.createElement("option");
                 option.value = role.id;
                 option.textContent = role.role;
                 roleTable.appendChild(option);
+                let roleOption = document.createElement("option");
+                roleOption.value = role.role;
+                roleOption.textContent = role.role;
+                roleFilter.appendChild(roleOption);
             });
         }
 

@@ -4,10 +4,224 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Medlem</title>
+    <link rel="stylesheet" href="css/medlem.css">
 </head>
 <body>
-    <h1>Medlem Page</h1>
+    <div class="main">
+        <div class="nav-bar">
+            <div class="user">
+              <h1>Medlem Page</h1>
+            </div>
+            <div class="logout">
+              <div class="buttons">
+                <button id="settingButton">Bruker innstillinger</button>
+                <button id="logoutButton">Logout</button>
+              </div>
+            </div>
+          </div>
+          <div id="settingsOverlay" class="overlay">
+            <div class="overlay-content">
+              <h1>Endre innstillinger</h1>
+              <p>Navn: <input id="changeName" type="text">
+              </p>
+              <p>Telefon: <input id="changePhone" type="text">
+              </p>
+              <p>Peletong: 
+              <select name="changePeletong" id="changePeletong">
+              </select>
+              </p>
+              <p>Role: 
+              <select name="changeRole" id="changeRole">
+              </select>
+              </p>
+              <p id="messageSettings"></p>
+              <div class="buttons">
+                <button id="changeSettings">Large</button>
+                <button id="exitSettings">Exit</button>
+              </div>
+            </div>
+          </div>
+          <div class="top">
+             <div class="userInfo">
+                <h1>Velkommen <span id="userName"></span></h1>
+                <p>Din role er <span id="userRole"></span>.</p>
+                <p>Du er med i kompani <span id="userKompani">.</span></p>
+                <p>Du er med i peletong <span id="userPeletong">.</span></p>
+                <p>I kompaniet ditt er det <span id="userKompaniUsers"> </span> andre medlemmer.</p>
+                <p>I ditt peletong er det <span id="userPeletongUsers"></span> andre medlemer.</p>
+                <p>I kompaniet du er med i, er det <span id="userPeletongAmount"></span> peletonger.</p>
+
+             </div>
+             <div style="display: block;" id="" class="parentInfo">
+                 <h2>Foreldre</h2>
+                 <button onclick="forelderDiv('nåværende', 'forespørsel' )">Foreldre Forespørsel</button>
+                 <button onclick="forelderDiv('forespørsel', 'nåværende' )">Nåværende Foreldre</button>
+                 <div style="display: block;" id="forespørsel" class="forespørsel"> 
+                    <h1>Foreldre Forespørsel</h1>
+                    <table id="forespørselTable"> 
+                        <thead>
+                            <tr>
+                                <th>Navn</th>
+                                <th>Telefon</th>
+                                <th>Barn</th>
+                            </tr>
+                        </thead>
+                    </table>
+                 <div style="display: none;" id="nåværende" class="nåværende"> 
+                 </div>
+             </div>
+          </div>
+          <div class="bottom">
+          </div>
+    </div>
 </body>
 <script>
+    let currentRoleId;
+    let currentPeletongId;
+    document.getElementById('logoutButton').addEventListener('click', async function(event) {
+        event.preventDefault();
+        let response = await fetch('/logout')
+        let data = await response.json()
+        if (data.redirectUrl) {
+            window.location.href = data.redirectUrl;
+        }
+    })    
+    function forelderDiv(hide, show) {
+        document.getElementById(show).style.display = "block";
+        document.getElementById(hide).style.display = "none";
+    }
+    async function userInfo(){
+        document.getElementById('changePeletong').innerHTML = "";
+        document.getElementById('changeRole').innerHTML = "";
+        let response = await fetch('/userInfo')
+        let data = await response.json()
+        data.forEach(user => {
+            document.getElementById("userName").textContent = user.name
+            document.getElementById("userRole").textContent = user.role
+            document.getElementById("userKompani").textContent = user.kompani
+            document.getElementById("userPeletong").textContent = user.peletong
+            document.getElementById("userKompaniUsers").textContent = user.amountUsers  
+            document.getElementById("userPeletongUsers").textContent = user.amountUsersPeletong
+            document.getElementById("userPeletongAmount").textContent = user.amountPeletongs
+            document.getElementById('changeName').placeholder = user.name;
+            document.getElementById('changePhone').placeholder = user.telephone;
+            let optionPeletongChange = document.createElement("option");
+            optionPeletongChange.value =  user.peletong_id;
+            optionPeletongChange.textContent = user.peletong;
+            document.getElementById('changePeletong').appendChild(optionPeletongChange);  
+            let optionRoleChange = document.createElement("option");
+            optionRoleChange.value =  user.role_id;
+            optionRoleChange.textContent = user.role;
+            document.getElementById('changeRole').appendChild(optionRoleChange);  
+            currentRoleId = user.role_id
+            currentPeletongId = user.peletong_id
+    })};
+    document.getElementById('changeSettings').addEventListener('click', async function(event) {
+        let changeNameInput = document.getElementById("changeName");
+        let changePhoneInput = document.getElementById("changePhone");
+
+        let newName = changeNameInput.value !== "" ? changeNameInput.value : changeNameInput.placeholder;
+        let newPhone = changePhoneInput.value !== "" ? changePhoneInput.value : changePhoneInput.placeholder;
+        let newPeletong = document.getElementById("changePeletong").value;
+        let newRole = document.getElementById("changeRole").value;
+
+        const updateUser = {
+            name: newName,
+            telephone: newPhone,
+            peletong: newPeletong,
+            role: newRole, 
+        };
+        const requestOptions = {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(updateUser)
+        };
+        const response = await fetch('/changeSettingsMedlem', requestOptions);
+        const data = await response.json(); 
+        if (data.ErrorMessage) {
+            document.getElementById('messageSettings').innerText = data.ErrorMessage
+            document.getElementById('messageSettings').style.color = "red"
+        } else if (data.Message) {
+            document.getElementById('messageSettings').innerText = data.Message
+            document.getElementById('messageSettings').style.color = "green"
+            document.getElementById("changeName").value = "";
+            document.getElementById("changePhone").value = "";
+        }
+        userInfo()
+        getRole()
+        getPeletong() 
+    })
+    async function getRole() {
+    let response = await fetch('/getRole')
+    let roles = await response.json()
+    let roleTable = document.getElementById("changeRole");
+    roles.forEach(role => {
+        if (role.id !== currentRoleId ){ 
+            let option = document.createElement("option");
+            option.value =  role.id;
+            option.textContent = role.role;
+            roleTable.appendChild(option);  
+        }
+    })
+    }
+    async function getPeletong() {
+    let response = await fetch('/getPeletongLeder')
+    let peletongs = await response.json()
+    let peletongTable = document.getElementById("changePeletong")
+    peletongs.forEach(peletong => {
+        if(peletong.id !== currentPeletongId){
+            let option = document.createElement("option");
+            option.value =  peletong.id; 
+            option.textContent = peletong.peletong;
+            peletongTable.appendChild(option);  
+        }}) 
+    };
+
+    async function getFamilyForespørsel(){
+        let tableFamily = document.getElementById("forespørselTable");
+        let response = await fetch('/getFamilyForesporsels')
+        let familys = await response.json()
+        familys.forEach(family => {
+            let row = tableFamily.insertRow();
+            row.insertCell().textContent = family.name;
+            row.insertCell().textContent = family.telephone;
+            row.insertCell().textContent = family.family;
+            let godkjendButton = document.createElement("button");
+            godkjendButton.id = "godkjendButton"
+            godkjendButton.textContent = "Godkjent";
+            godkjendButton.value = family.name;
+            row.insertCell().appendChild(godkjendButton);
+            let ikkeGodkjendButton = document.createElement("button");
+            ikkeGodkjendButton.id = "ikkeGodkjendButton"
+            ikkeGodkjendButton.textContent = "Ikke Godkjent";
+            ikkeGodkjendButton.value = family.name;
+            row.insertCell().appendChild(ikkeGodkjendButton);
+            godkjendButton.addEventListener('click', familyGodkjend(family.name))
+            ikkeGodkjendButton.addEventListener('click', familyIkkeGodkjend(family.name))
+            
+        })
+    }
+     
+    
+    let overlaySetting = document.getElementById("settingsOverlay");
+    let btn = document.getElementById("settingButton");
+    let exit = document.getElementById("exitSettings");
+
+    btn.onclick = function() {
+       overlaySetting.style.display = "block";
+    } 
+
+    exit.onclick = function() {
+        overlaySetting.style.display = "none";
+        document.getElementById("changeName").value = "";
+        document.getElementById("changePhone").value = "";
+        document.getElementById('messageSettings').innerText = ""
+        document.getElementById('changeRole').selectedIndex = 0;
+        document.getElementById('changePeletong').selectedIndex = 0;
+    }
+    userInfo()
+    getFamilyForespørsel()
+    getRole()
+    getPeletong()
 </script>
 </html>
