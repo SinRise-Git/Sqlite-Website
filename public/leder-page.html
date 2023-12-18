@@ -92,7 +92,19 @@
             </div>
             <div style="display: block;" id="usersGodkjent">
               <h2>Godkjente brukere</h2>
-              <div class="users"></div>
+              <div class="userFilters">
+                <label for="peletongFilter">Peletong:</label>
+                <select id="peletongFilter">
+                  <option value="All">All</option>
+                </select>
+                <label for="roleFilter">Role:</label>
+                <select id="roleFilter">
+                  <option value="All">All</option>
+               </select>
+              </div>
+              <div class="users">
+
+              </div>
             </div>
             <div style="display: none;" id="usersIkkeGodkjent">
               <h2>Ikke godkjente bruker</h2>
@@ -155,8 +167,6 @@
                 `
                 document.querySelector("#usersIkkeGodkjent .users").innerHTML += userDiv;
             }
-            userInfo()
-            getPeleton()
         });
     }
     function userDelete(userName) {
@@ -173,6 +183,7 @@
                 };
                  const response = await fetch('/deleteUser', requestOptions);
                  const data = await response.json();
+                 getUsersLeder()
             }
         };           
     function userActivate(userName) {
@@ -189,8 +200,9 @@
                 };
                  const response = await fetch('/activateUser', requestOptions);
                  const data = await response.json();
+                 getUsersLeder()
             }
-        };
+        }; 
     function userEdit(user, telefon, uuid) {
           return async function (event) {
              let peletongTable = document.getElementById('peletongEdit')
@@ -244,7 +256,7 @@
     }
   
     async function getPeleton(){
-            let response = await fetch('/getPeletongLeder')
+            let response = await fetch('/getPeletongLeder?_=' + new Date().getTime())
             let peletongs = await response.json()
             let peletongTable = document.getElementById("peletongTable")
             let peletongFilter = document.getElementById('peletongEdit')
@@ -303,6 +315,7 @@
                     document.getElementById('errorMessagePeletong').innerText = "";
                 }, 5000); 
             } 
+            await getPeleton();
         }
     )
     function peletongDelete(peletong) {

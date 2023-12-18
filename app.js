@@ -393,10 +393,10 @@ async function getPeletongs(request, response) {
 async function getPeletongLeders(request, response) {
     const sql = db.prepare(`
         SELECT peletonger.ID, peletonger.peletong_navn, peletonger.kompani_id, 
-            (SELECT COUNT(DISTINCT users.id) FROM users WHERE users.peletong = peletonger.ID) AS amountUsers
+            (SELECT COUNT(DISTINCT users.id) FROM users WHERE users.peletong = peletonger.ID AND users.userstatus = 'True') AS amountUsers
         FROM peletonger
         INNER JOIN kompanier ON peletonger.kompani_id = kompanier.id
-        WHERE peletonger.kompani_id = ?
+        WHERE peletonger.kompani_id = ? 
     `);
     
     let rows = sql.all(request.session.userKompani);

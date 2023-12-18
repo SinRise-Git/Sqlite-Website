@@ -130,10 +130,11 @@ h3 {
     cursor: pointer;
 }
 
-#errorMessagePeletongRemove, #messageSettingsEdit, #messageSettings {
+#errorMessagePeletongRemove, #messageSettingsEdit, #messageSettings, #errorMessagePeletong {
     color: red;
     font-size: 13px;
 }
+
 
 .lederPeletong button{
     background-color: #121212;
@@ -185,7 +186,7 @@ h3 {
 
 .bottom .button button {
     padding: 10px 20px 10px 20px;
-    margin: 10px;
+    margin: 10px 10px 0px 10px;
     background-color: #121212;
     color: white;
     border-radius: 10px;
@@ -211,8 +212,7 @@ h3 {
 #usersGodkjent h2, #usersIkkeGodkjent h2{
     font-size: 2vh;
     color: white;
-    margin-left: 20px;
-    margin: 5px 0px 5px 0px;
+    margin: 7.5px 0px 7.5px 0px;
     text-align: center;
 }
 
@@ -233,5 +233,17 @@ h3 {
     cursor: pointer;
     font-weight: bolder;
     font-size: 1.6vh;
+}
+
+.userFilters{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: row;
+    gap: 10px;
+}
+
+.userFilters label{
+    color: white;
 }
 
