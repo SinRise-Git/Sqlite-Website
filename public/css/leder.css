@@ -28,9 +28,6 @@ h3 {
     height: 7vh;
 }
 
-
-
-
 .nav-bar button{
    padding: 10px 20px 10px 20px ;
    color: white;
@@ -40,6 +37,9 @@ h3 {
    background-color: transparent;
    cursor: pointer;
    font-size: 2vh;
+   margin-right: 10px;
+   background-color: #121212;
+   
 }
 
 .lederPeletong table{
@@ -57,14 +57,12 @@ h3 {
     overflow: auto;
 }
 
-
 .userInfo, .lederPeletong {
     background-color: black;
     padding: 10px 40px 10px 40px;
     border-radius: 10px;
     max-height: 33.3vh;
     overflow: auto;
-    
 }
 
 .top p {
@@ -148,13 +146,14 @@ h3 {
     
 }
 
-.lederPeletong input{
+.lederPeletong input, #searchFilter{
     background-color: #121212;
     border: 1px solid white;
     border-radius: 5px;
     color: white;
     height: 0.8vw;
 }
+
 
 
 .confirmAccounts{

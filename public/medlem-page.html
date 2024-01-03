@@ -71,8 +71,9 @@
                  </div>
              </div>
           </div>
-          <div class="bottom">
-          </div>
+       </div>
+       <div class="bottom">
+     </div>
     </div>
 </body>
 <script>
@@ -198,10 +199,18 @@
             row.insertCell().appendChild(ikkeGodkjendButton);
             godkjendButton.addEventListener('click', familyGodkjend(family.name))
             ikkeGodkjendButton.addEventListener('click', familyIkkeGodkjend(family.name))
-            
         })
     }
-     
+    function familyGodkjend(name){
+        return async function(event){
+
+        }
+    }
+    function familyIkkeGodkjend(name){
+        return async function(event){
+            
+        }
+    }
     
     let overlaySetting = document.getElementById("settingsOverlay");
     let btn = document.getElementById("settingButton");

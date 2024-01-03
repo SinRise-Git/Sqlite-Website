@@ -386,6 +386,7 @@ async function getFamilyForesporsels(request, response){
         telephone: family.telefon,
         family: family.family,
     }));
+    console.log(familys)
     response.send(familys);
 }
 
