@@ -14,14 +14,20 @@ body{
 }
 
 .nav-bar button{
-   padding: 10px 20px 10px 20px ;
-   color: white;
-   background-color: gray;
-   border-radius: 5px;
-   border: 0px solid;
-   background-color: transparent;
-   cursor: pointer;
-   font-size: 2vh;
+    padding: 10px 20px 10px 20px ;
+    color: white;
+    background-color: gray;
+    border-radius: 5px;
+    border: 0px solid;
+    background-color: transparent;
+    cursor: pointer;
+    font-size: 2vh;
+    margin-right: 10px;
+    background-color: #121212;
+}
+
+.user h1 {
+    font-size: 1.2vw;
 }
 
 .top{
@@ -33,13 +39,25 @@ body{
     
 }
 
+.top p {
+    font-size: 1.95vh;
+}
+
+.top h1{
+    font-size: 1.2vw;
+}
+
 .top .userInfo, .top .parentInfo {
     background-color: black;
     padding: 10px 40px 10px 40px;
     border-radius: 10px;
     margin: 10px;
-    max-height: 33.3vh;
     overflow: auto;
+    height: 33.3vh;
+}
+
+#messageSettings {
+    font-size: 13px;
 }
 
 .bottom{
@@ -47,20 +65,23 @@ body{
    height: 46.5vh;
 }
 
-.parentInfo h1 {
-    font-size: 20px;
+.top th {
+    font-size: 2vh;
+}
+
+.top td {
+   font-size: 2vh;
 }
 
 .parentInfo button {
     color: white;
     background-color: #121212;
     border: 0px solid;
-    padding: 10px 20px 10px 20px;
+    padding: 9px 20px 9px 20px;
     border-radius: 5px;
-    margin: 5px;
-}
-.parentInfo h2 {
-  font-size: 30px;
+    font-size: 2vh;
+    margin: 2px;
+    cursor: pointer;
 }
 
 .overlay {
@@ -110,11 +131,11 @@ body{
     border-radius: 5px;
 }
 
-#forespørselTable th{
+#forespørselTable th, #activeTable th{
     padding: 0px 10px 0px 10px;
 }
 
-#forespørselTable tr{
+#forespørselTable tr, #activeTable tr{
     text-align: center;
 }
 

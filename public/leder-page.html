@@ -293,7 +293,7 @@
              document.getElementById("changeNameEdit").value = "";
              document.getElementById("changePhoneEdit").value = "";
             } 
-            userEdit(newName, newPhone, uuid)();
+            userEdit(newName, newPhone, uuid, newPeletong, newRole);
             getUsersLeder()
     }
   
@@ -354,7 +354,7 @@
                     document.getElementById('errorMessagePeletong').innerText = "";
                 }, 5000); 
             } 
-            await getPeleton();
+            getPeleton();
         }
     )
     function peletongDelete(peletong) {

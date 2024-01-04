@@ -5,10 +5,9 @@ const bcrypt = require('bcrypt')
 const dotenv = require('dotenv')
 const session = require("express-session")
 const uuid = require('uuid')    
-const { fail } = require("assert")
+const { request } = require("http")
 
 dotenv.config();
-
 
 const app = express();
 const staticPath = path.join(__dirname, 'public')
@@ -98,6 +97,20 @@ function removePeletongs(removePeletongs){
     const info = sql.run(removePeletongs)    
 }
 
+function godkjentFamily(nameFamily, nameUser){
+    const sqlUser = db.prepare("UPDATE users SET family = ? WHERE name = ? ")
+    const sqlFamily = db.prepare("UPDATE users SET userStatus = ? WHERE name = ?")
+    const infoUser = sqlUser.run(nameFamily, nameUser)
+    const infoFamily = sqlFamily.run("True", nameFamily)
+}
+
+function removeFamily(nameFamily, nameUser){
+    const sqlUser = db.prepare("UPDATE users SET family = ? WHERE name = ? ")
+    const sqlFamily = db.prepare("DELETE FROM users WHERE name = ?")
+    const infoUser = sqlUser.run("Empty", nameUser)
+    const infoFamily = sqlFamily.run(nameFamily)
+}
+
 
 app.post("/createUser", createUsers)
 
@@ -115,7 +128,11 @@ app.get("/getUsersAdmin", getUsersAdmins)
 
 app.get("/getUsersLeder", getUsersLeders)
 
-app.get("/getFamilyForesporsels", getFamilyForesporsels)
+app.get("/getFamily", getFamily)
+
+app.put("/familyGodkjend", familyGodkjend)
+
+app.put("/familyRemove", familyRemove)
 
 app.post("/deleteUser", deleteUsers)
 
@@ -182,6 +199,7 @@ async function loginUsers(request, response) {
     }
 }
 
+
 async function getUserInfo(request, response){
     const sql = db.prepare(`
        SELECT users.name, kompanier.kompani, users.telefon, peletonger.peletong_navn, users.peletong, roler.roles, users.role,
@@ -213,9 +231,6 @@ async function getUserInfo(request, response){
     }));
     response.send(users);
 }
-
-
-
 
 async function deleteKompanis(request, response) {
     const user = request.body;
@@ -378,18 +393,36 @@ async function getKompanis(request, response) {
     response.send(kompanis);
 }
 
-async function getFamilyForesporsels(request, response){
-    const sql = db.prepare("SELECT name, telefon, family FROM users WHERE family = ? AND userStatus = 'False'");
+async function getFamily(request, response){
+    const sql = db.prepare("SELECT name, telefon, family, userStatus FROM users WHERE family = ?");
     let rows = sql.all(request.session.userName);
     let familys = rows.map(family => ({
         name: family.name,
         telephone: family.telefon,
         family: family.family,
+        status: family.userStatus,
     }));
-    console.log(familys)
     response.send(familys);
 }
 
+async function familyGodkjend(request, response){
+    const sql = db.prepare("SELECT name FROM users WHERE name = ? AND family = 'Empty'")
+    let rows = sql.all(request.session.userName)
+    if (rows.length == 1){
+        const data = request.body
+        godkjentFamily(data.name, request.session.userName)
+    }
+    else{
+        response.send({
+            ErrorMessage: `You can only have one family member!`
+        });
+    }
+}
+
+async function familyRemove(request, response){
+    const data = request.body
+    removeFamily(data.name, request.session.userName)
+}
 
 async function getChilds(request, response){
     const sql = db.prepare("SELECT name FROM users WHERE userType = 'Medlem'");

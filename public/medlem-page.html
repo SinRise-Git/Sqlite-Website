@@ -48,12 +48,11 @@
                 <p>Du er med i kompani <span id="userKompani">.</span></p>
                 <p>Du er med i peletong <span id="userPeletong">.</span></p>
                 <p>I kompaniet ditt er det <span id="userKompaniUsers"> </span> andre medlemmer.</p>
-                <p>I ditt peletong er det <span id="userPeletongUsers"></span> andre medlemer.</p>
-                <p>I kompaniet du er med i, er det <span id="userPeletongAmount"></span> peletonger.</p>
-
+                <p>I kompaniet du er med i er det <span id="userPeletongAmount"></span> peletonger.</p>
+                <p>I din peletong er det <span id="userPeletongUsers"></span> andre medlemer.</p>
              </div>
              <div style="display: block;" id="" class="parentInfo">
-                 <h2>Foreldre</h2>
+                 <h1>Foreldre</h1>
                  <button onclick="forelderDiv('nåværende', 'forespørsel' )">Foreldre Forespørsel</button>
                  <button onclick="forelderDiv('forespørsel', 'nåværende' )">Nåværende Foreldre</button>
                  <div style="display: block;" id="forespørsel" class="forespørsel"> 
@@ -67,8 +66,21 @@
                             </tr>
                         </thead>
                     </table>
+                    <p id="errorMessageForeldre"></p>
+                  </div>
                  <div style="display: none;" id="nåværende" class="nåværende"> 
-                 </div>
+                    <h1>Aktive Foreldre</h1>
+                    <table id="activeTable"> 
+                        <thead>
+                            <tr>
+                                <th>Navn</th>
+                                <th>Telefon</th>
+                                <th>Barn</th>
+                            </tr>
+                        </thead>
+                    </table>
+                  </div>      
+                </div>
              </div>
           </div>
        </div>
@@ -179,36 +191,78 @@
     };
 
     async function getFamilyForespørsel(){
-        let tableFamily = document.getElementById("forespørselTable");
-        let response = await fetch('/getFamilyForesporsels')
+        let tableFamilyForespørsel = document.getElementById("forespørselTable");
+        let tableFamilyAktiv = document.getElementById("activeTable")
+        let response = await fetch('/getFamily')
         let familys = await response.json()
         familys.forEach(family => {
-            let row = tableFamily.insertRow();
-            row.insertCell().textContent = family.name;
-            row.insertCell().textContent = family.telephone;
-            row.insertCell().textContent = family.family;
-            let godkjendButton = document.createElement("button");
-            godkjendButton.id = "godkjendButton"
-            godkjendButton.textContent = "Godkjent";
-            godkjendButton.value = family.name;
-            row.insertCell().appendChild(godkjendButton);
-            let ikkeGodkjendButton = document.createElement("button");
-            ikkeGodkjendButton.id = "ikkeGodkjendButton"
-            ikkeGodkjendButton.textContent = "Ikke Godkjent";
-            ikkeGodkjendButton.value = family.name;
-            row.insertCell().appendChild(ikkeGodkjendButton);
-            godkjendButton.addEventListener('click', familyGodkjend(family.name))
-            ikkeGodkjendButton.addEventListener('click', familyIkkeGodkjend(family.name))
+            if (family.status == "False" ) {
+                let row = tableFamilyForespørsel.insertRow();
+                row.insertCell().textContent = family.name;
+                row.insertCell().textContent = family.telephone;
+                row.insertCell().textContent = family.family;
+                let godkjendButton = document.createElement("button");
+                godkjendButton.id = "godkjendButton"
+                godkjendButton.textContent = "Godkjent";
+                godkjendButton.value = family.name;
+                row.insertCell().appendChild(godkjendButton);
+                let ikkeGodkjendButton = document.createElement("button");
+                ikkeGodkjendButton.id = "ikkeGodkjendButton"
+                ikkeGodkjendButton.textContent = "Ikke Godkjent";
+                ikkeGodkjendButton.value = family.name;
+                row.insertCell().appendChild(ikkeGodkjendButton);
+                godkjendButton.addEventListener('click', familyGodkjend(family.name))
+                ikkeGodkjendButton.addEventListener('click', familyRemove(family.name))
+            } else if (family.status == "True") {
+                let row = tableFamilyAktiv.insertRow();
+                row.insertCell().textContent = family.name;
+                row.insertCell().textContent = family.telephone;
+                row.insertCell().textContent = family.family;
+                let fjernButton = document.createElement("button");
+                fjernButton.id = "fjernButton"
+                fjernButton.textContent = "Fjern Foreldre";
+                fjernButton.value = family.name;
+                row.insertCell().appendChild(fjernButton);
+                fjernButton.addEventListener('click', familyRemove(family.name))
+            }
+            
         })
     }
     function familyGodkjend(name){
         return async function(event){
+            event.preventDefault();
+               const godkjendFamily = {
+                 name: name
+                };
 
+                const requestOptions = {
+                  method: 'PUT',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(godkjendFamily)
+                };
+                 const response = await fetch('/familyGodkjend', requestOptions);
+                 const data = await response.json();
+                 if (data.ErrorMessage){
+                    document.getElementById('errorMessageForeldre').innerText = data.ErrorMessage
+                    document.getElementById('errorMessageForeldre').style.color = "red"
+                 };
         }
     }
-    function familyIkkeGodkjend(name){
+
+    function familyRemove(name){
         return async function(event){
-            
+            event.preventDefault();
+               const removeFamily = {
+                 name: name
+                };
+
+                const requestOptions = {
+                  method: 'PUT',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(removeFamily)
+                };
+                 const response = await fetch('/familyRemove', requestOptions);
+                 const data = await response.json();
         }
     }
     

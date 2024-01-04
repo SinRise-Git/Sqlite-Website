@@ -155,7 +155,6 @@ h3 {
 }
 
 
-
 .confirmAccounts{
     padding: 1px;
 }
@@ -212,7 +211,7 @@ h3 {
 #usersGodkjent h2, #usersIkkeGodkjent h2{
     font-size: 2vh;
     color: white;
-    margin: 7.5px 0px 7.5px 0px;
+    margin: 4px 0px 2px 0px;
     text-align: center;
 }
 
