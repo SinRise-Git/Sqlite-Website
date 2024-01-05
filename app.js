@@ -409,13 +409,19 @@ async function familyGodkjend(request, response){
     const sql = db.prepare("SELECT name FROM users WHERE name = ? AND family = 'Empty'")
     let rows = sql.all(request.session.userName)
     if (rows.length == 1){
-        const data = request.body
-        godkjentFamily(data.name, request.session.userName)
-    }
-    else{
-        response.send({
-            ErrorMessage: `You can only have one family member!`
-        });
+        const sqlCheck = db.prepare("SELECT name FROM users WHERE userStatus = ? AND family = ?")
+        let rows = sql.all("True", request.session.userName)
+        if (rows.length == 1){
+            const data = ` og ${request.body}`
+            godkjentFamily(data, request.session.userName)
+        } else if (rows.length == 2) {
+            const data = request.body
+            godkjentFamily(data.name, request.session.userName)
+        } else {
+            response.send({
+                ErrorMessage: `You can only have two family member!`
+            });
+        }
     }
 }
 
