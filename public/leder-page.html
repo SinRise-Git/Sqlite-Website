@@ -133,7 +133,6 @@
             document.getElementById('changePhone').placeholder = user.telephone;
         });
     }
-
     async function getUsersLeder(){
     let countGodkjent = 0;
     let countIkkeGodkjent = 0;
@@ -157,7 +156,7 @@
                 <p>Kompani: ${user.kompani}</p>
                 <p id="${user.name}-Peletong" value="${user.peletong}">Peletong: ${user.peletong}</p>
                 <p id="${user.name}-Role" value="${user.role}">Role: ${user.role}</p>
-                <p>Kjønn: ${user.gender}</p>
+                <p>Foreldre: ${user.family}</p>
                 <button onclick="(userEdit('${user.name}', '${user.telephone}', '${user.uuid}', '${user.peletong}', '${user.role}'))(event)">Rediger</button>
                 <button onclick="(userDelete('${user.name}'))(event)">Fjern Brukere</button>
             </div>
@@ -166,7 +165,7 @@
         } else if (user.userstatus === "False") {
             countIkkeGodkjent += 1;
             let userDiv = `
-            <div">
+            <div>
                 <h3>Navn: ${user.name}</h3>
                 <p>Telefon: ${user.telephone}</p>
                 <p>Kompani: ${user.kompani}</p>

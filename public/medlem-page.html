@@ -62,14 +62,13 @@
                             <tr>
                                 <th>Navn</th>
                                 <th>Telefon</th>
-                                <th>Barn</th>
                             </tr>
                         </thead>
                     </table>
                     <p id="errorMessageForeldre"></p>
                   </div>
                  <div style="display: none;" id="nåværende" class="nåværende"> 
-                    <h1>Aktive Foreldre</h1>
+                    <h1>Nåværende Foreldre</h1>
                     <table id="activeTable"> 
                         <thead>
                             <tr>
@@ -85,10 +84,26 @@
           </div>
        </div>
        <div class="bottom">
+        <div class="button">
+            <button onclick="changeUsers('otherUsers', 'otherLeders')">Brukere</button>
+            <button onclick="changeUsers('otherLeders', 'otherUsers')">Ledere</button>
+        </div>
+          <div style="display: block;" id="otherUsers">
+            <h2>Brukere (<span id="totalBrukere">0</span>)</h2>
+          </div>
+          <div style="display: none;" id="otherLeders">
+            <h2>Ledere (<span id="totalLedere">0</span>)</h2>
+          </div>
+        </div>
      </div>
     </div>
 </body>
 <script>
+    function changeUsers(show, hide){
+       document.getElementById(show).style.display = "block";
+       document.getElementById(hide).style.display = "none";
+    }
+
     let currentRoleId;
     let currentPeletongId;
     document.getElementById('logoutButton').addEventListener('click', async function(event) {
@@ -200,7 +215,6 @@
                 let row = tableFamilyForespørsel.insertRow();
                 row.insertCell().textContent = family.name;
                 row.insertCell().textContent = family.telephone;
-                row.insertCell().textContent = family.family;
                 let godkjendButton = document.createElement("button");
                 godkjendButton.id = "godkjendButton"
                 godkjendButton.textContent = "Godkjent";
@@ -282,9 +296,17 @@
         document.getElementById('changeRole').selectedIndex = 0;
         document.getElementById('changePeletong').selectedIndex = 0;
     }
+
+    async function getUsersMedlem() {
+        let countBrukere = 0;
+        let countLedere = 0; 
+        let response = await fetch('/getUsersMedlem')
+        let data = await response.json()
+    }
     userInfo()
     getFamilyForespørsel()
     getRole()
     getPeletong()
+    getUsersMedlem()
 </script>
 </html>

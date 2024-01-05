@@ -128,6 +128,8 @@ app.get("/getUsersAdmin", getUsersAdmins)
 
 app.get("/getUsersLeder", getUsersLeders)
 
+app.get("/getUsersMedlem", getUsersMedlems)
+
 app.get("/getFamily", getFamily)
 
 app.put("/familyGodkjend", familyGodkjend)
@@ -243,7 +245,7 @@ async function deleteKompanis(request, response) {
 
     if (rows[0].count > 0){
         response.send({
-            ErrorMessage: `Can't delete kompani since it has users and peletongs!`
+            ErrorMessage: `Can't delete kompani since it has users and or peletongs`
         });
     } else {
         removeKompanis(user.kompani)
@@ -261,7 +263,7 @@ async function deletePeletongs(request, response) {
 
     if (rows[0].count > 0){
         response.send({
-            ErrorMessage: `Cant delete peletong since it has users!`
+            ErrorMessage: `Cant delete peletong since it has users`
         });
     } else {
         removePeletongs(user.peletong)
@@ -317,7 +319,7 @@ async function deleteUsers(request){
 
 async function getUsersLeders(request, response) {
     const sql = db.prepare(`
-        SELECT users.uuid, users.name, users.role, roler.roles, kompanier.kompani, users.userType, users.telefon, users.gender, peletonger.peletong_navn, users.userStatus
+        SELECT users.uuid, users.name, users.role, roler.roles, kompanier.kompani, users.userType, users.telefon, users.gender, users.family, peletonger.peletong_navn, users.userStatus
         FROM users 
         INNER JOIN kompanier ON users.kompani = kompanier.id 
         INNER JOIN roler ON users.role = roler.id 
@@ -330,6 +332,7 @@ async function getUsersLeders(request, response) {
         name: user.name,
         telephone: user.telefon,
         gender: user.gender,
+        family: user.family,
         userType: user.userType,
         role: user.roles,
         role_id: user.role,
@@ -338,6 +341,30 @@ async function getUsersLeders(request, response) {
         userstatus: user.userStatus
     }));
     response.send(users);
+}
+
+async function getUsersMedlems(request, response) {
+    const sql = db.prepare(`
+    SELECT users.name, roler.roles, kompanier.kompani, users.userType, users.telefon, users.gender, peletonger.peletong_navn, users.userStatus
+    FROM users 
+    INNER JOIN kompanier ON users.kompani = kompanier.id 
+    INNER JOIN roler ON users.role = roler.id 
+    INNER JOIN peletonger ON users.peletong = peletonger.id
+    WHERE (users.userType = 'Medlem' OR users.userType = 'Leder') AND users.kompani = ? AND users.userStatus = 'True';
+    `);
+    let rows = sql.all(request.session.userKompani);
+    let users = rows.map(user => ({
+        name: user.name,
+        telephone: user.telefon,
+        gender: user.gender,
+        userType: user.userType,
+        role: user.roles,
+        kompani: user.kompani,
+        peletong: user.peletong_navn,
+        userstatus: user.userStatus,
+    }));
+    response.send(users);
+    console.log(users)
 }
 
 async function getUsersAdmins(request, response){
@@ -409,19 +436,13 @@ async function familyGodkjend(request, response){
     const sql = db.prepare("SELECT name FROM users WHERE name = ? AND family = 'Empty'")
     let rows = sql.all(request.session.userName)
     if (rows.length == 1){
-        const sqlCheck = db.prepare("SELECT name FROM users WHERE userStatus = ? AND family = ?")
-        let rows = sql.all("True", request.session.userName)
-        if (rows.length == 1){
-            const data = ` og ${request.body}`
-            godkjentFamily(data, request.session.userName)
-        } else if (rows.length == 2) {
-            const data = request.body
-            godkjentFamily(data.name, request.session.userName)
-        } else {
-            response.send({
-                ErrorMessage: `You can only have two family member!`
-            });
-        }
+        const data = request.body
+        godkjentFamily(data.name, request.session.userName)
+    }
+    else {
+        response.send({
+            ErrorMessage: `You can only have one family member`
+        });
     }
 }
 

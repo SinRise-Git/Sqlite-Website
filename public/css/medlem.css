@@ -156,3 +156,29 @@ body{
     padding: 8px 10px 8px 10px;
     cursor: pointer;
 }
+
+.bottom .button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: row;
+    padding-top: 5px;
+}
+
+.bottom .button button {
+    padding: 10px 20px 10px 20px;
+    margin: 10px 10px 10px 10px;
+    background-color: #121212;
+    color: white;
+    border-radius: 10px;
+    border: 0px solid;
+    font-size: 1.8vh;
+    cursor: pointer;
+}
+
+#otherUsers h2, #otherLeders h2{
+    font-size: 2vh;
+    color: white;
+    margin: 4px 0px 0px 0px;
+    text-align: center;
+}

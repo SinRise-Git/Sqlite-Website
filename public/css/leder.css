@@ -212,17 +212,18 @@ h3 {
 #usersGodkjent h2, #usersIkkeGodkjent h2{
     font-size: 2vh;
     color: white;
-    margin: 4px 0px 2px 0px;
+    margin: 4px 0px 0px 0px;
     text-align: center;
 }
 
 
-#usersGodkjent .users div #usersIkkeGodkjent, .users div  {
+#usersGodkjent .users div, #usersIkkeGodkjent .users div  {
     background-color: #121212;
     padding: 10px 20px 10px 20px;
     margin: 10px;
-    border-radius: 10px;
+    border-radius: 10px
 }
+
 
 .users button{
     background-color: black;
