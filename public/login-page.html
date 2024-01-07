@@ -8,15 +8,19 @@
 </head>
 <body>
     <div class="main">
+       <div class="forms">
         <div class="loginForm" id="loginForm" style="display: block;">
             <h1>Login</h1>
             <form>
-                <label for="username">Name:</label>
-                <input id="loginUsername" type="text" name="loginUsername">
+                <div class="info">
+                 <p class="info-p">Name:</p>
+                 <input id="loginUsername" type="text" name="loginUsername" placeholder="Name">
+                </div>
                 <br>
-                <label for="loginPassword">Password:</label>
-                <input id="loginPassword" type="password" name="loginPassword">
-                <br><br>
+                <div class="info">
+                 <p class="info-p">Password:</p>
+                 <input id="loginPassword" type="password" name="loginPassword" placeholder="Password">
+                </div>
             </form>
             <div class="loginButtons">
               <button id="loginButton">Login</button>
@@ -27,48 +31,65 @@
         <div class="createForm" id="createForm" style="display: none;">
             <h1>Create account</h1>
             <form>
-                <label for="createUsername">Name:</label>
-                <input id="createUsername" type="text" name="createUsername" required>
-                <br>
-                <label for="createPassword">Password:</label>
-                <input id="createPassword" type="password" name="createPassword"required>
-                <br>
-                <label for="createTelephone">Telephone:</label>
-                <input id="createTelephone" type="tel" name="createTelephone"required>
-                <br>
-                <label for="genderOption">Select a gender:</label>
-                <select id="genderOption" name="genderOption">
+                <div class="info">
+                 <p class="info-p">Name:</p>
+                 <input id="createUsername" type="text" name="createUsername" required>
+                </div>
+                <div class="info">
+                 <p class="info-p">Password:</p>
+                 <input id="createPassword" type="password" name="createPassword"required>
+                </div>
+                <div class="info">
+                 <p class="info-p">Telephone:</p>
+                 <input id="createTelephone" type="tel" name="createTelephone"required> 
+                </div>
+                <div class="info">
+                 <div>
+                  <p class="info-p">Gender:</p>
+                  <select id="genderOption" name="genderOption">
                     <option value="Male">Male</option>
                     <option value="Female">Female</option>
-                </select>   
-                <br>
-                <label for="userOption">Select user type:</label>
-                <select id="userOption" name="userOption" onchange="showOptions()">
+                  </select> 
+                 </div>
+                </div>
+                <div class="info">
+                 <div>
+                  <p class="info-p">User type:</p>
+                  <select id="userOption" name="userOption" onchange="showOptions()">
                     <option value="Medlem">Medlem</option>
                     <option value="Foreldre">Foreldre</option>
                     <option value="Leder">Leder</option>
-                </select>      
-                <br>
-                <div class="roleOptionDiv" id="roleOptionDiv" style="display: block;">
-                 <label for="roleOption">Select your role:</label>
+                  </select>
+                 </div>      
+                </div>
+                <div class="info">
+                 <div class="roleOptionDiv" id="roleOptionDiv" style="display: block;">
+                    <p class="info-p">Role:</p>
                   <select id="roleOption" name="roleOption">
                   </select>
+                 </div>
                 </div>
-                <div class="komaniOptionDiv" id="komaniOptionDiv" style="display: block;" onchange="getPeletong()"> 
-                 <label for="komaniOption">Select a kompani:</label>
+                <div class="info">
+                 <div class="komaniOptionDiv" id="komaniOptionDiv" style="display: block;" onchange="getPeletong()"> 
+                  <p class="info-p">Kompani:</p>
                   <select id="komaniOption" name="komaniOption">
-                  </select>    
+                  </select>   
+                 </div>
                 </div>
-                <div class="peletongOptionDiv" id="peletongOptionDiv" style="display: block;">
-                    <label for="peletongOption">Select a peletong</label>
+                <div class="info">
+                 <div class="peletongOptionDiv" id="peletongOptionDiv" style="display: block;">
+                     <p class="info-p">Peletong:</p>
                      <select id="peletongOption" name="peletongOption">
                      </select>
+                 </div>
                 </div>
-                <div class="childOptionDiv" id="childOptionDiv" style="display: none;"> 
-                    <label for="childOption">Select a child:</label>
+                <div class="info">
+                 <div class="childOptionDiv" id="childOptionDiv" style="display: none;"> 
+                     <p class="info-p">Child:</p>
                      <select id="childOption" name="childOption" inputmode="text">
                      </select>    
-                </div>   
+                 </div>   
+                </div>
             </form>
             <div class="createButtons">
               <button id="createButton">Create Account</button>
@@ -76,6 +97,7 @@
             </div>
             <p id="errorMessageCreate"></p>
         </div> 
+      </div>  
     </div>
     <script>
         function showforms(show, hide){

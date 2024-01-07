@@ -31,14 +31,14 @@ h3 {
 .nav-bar button{
    padding: 10px 20px 10px 20px ;
    color: white;
-   background-color: gray;
+   background-color: #242424;
    border-radius: 5px;
    border: 0px solid;
    background-color: transparent;
    cursor: pointer;
    font-size: 2vh;
    margin-right: 10px;
-   background-color: #121212;
+   background-color: #242424;
    
 }
 
@@ -86,7 +86,7 @@ h3 {
 }
 
 .overlay-content, .overlay-content-edit {
-    background-color: #121212;
+    background-color: #242424;
     padding: 20px;
     color: white;
     border: 1px solid white;
@@ -97,12 +97,21 @@ h3 {
     border-radius: 10px;
 }
 
-.overlay-content-edit, select {
+.overlay-content-edit select {
     color: white;
-    background-color: #121212;
+    background-color: #242424;
     border: 1px solid white;
     border-radius: 5px;
 }
+
+.userFilters select{
+    color: white;
+    background-color: #242424;
+    border: 1px solid white;
+    border-radius: 5px;
+    height: 2vh;
+}
+
 
 .overlay-content button, .overlay-content-edit button{
     background-color: black;
@@ -135,7 +144,7 @@ h3 {
 
 
 .lederPeletong button{
-    background-color: #121212;
+    background-color: #242424;
     color: white;
     border: 0px solid;
     border-radius: 10px;
@@ -147,11 +156,11 @@ h3 {
 }
 
 .lederPeletong input, #searchFilter{
-    background-color: #121212;
+    background-color: #242424;
     border: 1px solid white;
     border-radius: 5px;
     color: white;
-    height: 2vh;
+    height: 1.7vh;
    
 }
 
@@ -186,7 +195,7 @@ h3 {
 .bottom .button button {
     padding: 10px 20px 10px 20px;
     margin: 10px 10px 10px 10px;
-    background-color: #121212;
+    background-color: #242424;
     color: white;
     border-radius: 10px;
     border: 0px solid;

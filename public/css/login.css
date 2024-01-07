@@ -1,4 +1,79 @@
-.loginForm p, .createForm p{
-    color: red;
+.forms{
+    position: absolute;
+    top: 50%;
+    left: 50%; 
+    transform: translate(-50%, -50%); 
 }
 
+.loginForm, .createForm{
+    background-color: black;
+    padding: 20px;
+    margin: 20px;
+    color: white;
+    border-radius: 5px;
+}
+
+.loginForm button, .createForm button{
+    padding: 10px 20px 10px 20px;
+    margin: 10px 10px 0px 10px;
+    background-color: #121212;
+    color: white;
+    border-radius: 10px;
+    border: 0px solid;
+    cursor: pointer;
+    transition: text-decoration 0.3s ease-in-out;
+}
+
+.loginForm button:hover, .createForm button:hover{
+    text-decoration: underline;
+}
+
+
+h1{
+    text-align: center;
+}
+
+#errorMessageLogin, #errorMessageCreate{
+    color: red;
+    font-size: 13px;
+    margin: 10px 0px 10px 0px;
+    text-align: center;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+}
+
+.label {
+    display: block;
+}
+
+.info-p  {
+    margin: 0px;
+    padding: 0px;
+    font-weight: bolder;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+}
+
+.info{
+    display: grid;
+    align-items: center;
+    padding: 0px 20px 0px 20px;
+}
+
+.loginForm input, .createForm input{
+    background-color: #242424;
+    border: 1px solid white;
+    border-radius: 5px;
+    color: white;
+    height: 18px;
+    margin-bottom: 4px;
+}
+
+.createForm select{
+    color: white;
+    background-color: #242424;
+    border: 1px solid white;
+    border-radius: 5px;
+    height: 22px;
+    margin-bottom: 4px;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+
+}

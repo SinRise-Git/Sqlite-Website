@@ -89,10 +89,27 @@
             <button onclick="changeUsers('otherLeders', 'otherUsers')">Ledere</button>
         </div>
           <div style="display: block;" id="otherUsers">
+            <div class="filters">
+                <label for="searchBrukere">Search:</label>
+                <input type="text" id="searchBrukere" oninput="getUsersMedlem()">
+                <label for="filterPeletongs">Peletong:</label>
+                 <select id="filterPeletongs" onchange="getUsersMedlem()">
+                    <option value="All">All</option>
+                 </select>
+            </div>
             <h2>Brukere (<span id="totalBrukere">0</span>)</h2>
+            <div class="users">
+
+            </div>
           </div>
           <div style="display: none;" id="otherLeders">
+            <div class="filters">
+                <label for="searchBrukere">Search:</label>
+                <input type="text" id="searchLedere" oninput="getUsersMedlem()">  
+            </div>
             <h2>Ledere (<span id="totalLedere">0</span>)</h2>
+            <div class="users">
+            </div>
           </div>
         </div>
      </div>
@@ -184,7 +201,7 @@
     let roles = await response.json()
     let roleTable = document.getElementById("changeRole");
     roles.forEach(role => {
-        if (role.id !== currentRoleId ){ 
+        if (role.id !== currentRoleId){ 
             let option = document.createElement("option");
             option.value =  role.id;
             option.textContent = role.role;
@@ -196,13 +213,22 @@
     let response = await fetch('/getPeletongLeder')
     let peletongs = await response.json()
     let peletongTable = document.getElementById("changePeletong")
+    let peletongFilter = document.getElementById("filterPeletongs")
     peletongs.forEach(peletong => {
         if(peletong.id !== currentPeletongId){
             let option = document.createElement("option");
             option.value =  peletong.id; 
             option.textContent = peletong.peletong;
             peletongTable.appendChild(option);  
-        }}) 
+        }
+        while (peletongFilter.options.length > 2) {
+            peletongFilter.remove(1);
+        }
+        let option = document.createElement("option");
+        option.value =  peletong.peletong; 
+        option.textContent = peletong.peletong;
+        peletongFilter.appendChild(option)
+        })
     };
 
     async function getFamilyForespørsel(){
@@ -302,6 +328,42 @@
         let countLedere = 0; 
         let response = await fetch('/getUsersMedlem')
         let data = await response.json()
+        document.querySelector("#otherUsers .users").innerHTML = '';
+        document.querySelector("#otherLeders .users").innerHTML = '';
+        let selectedPeletong = document.getElementById("filterPeletongs").value
+        let searchBrukere = document.getElementById("searchBrukere").value.toLowerCase();
+        let searchLedere = document.getElementById("searchLedere").value.toLowerCase();
+        data.forEach(user => {
+            if(user.userType === "Medlem"){
+               if((selectedPeletong === "All" || user.peletong === selectedPeletong) && (searchBrukere === "" || user.name.toLowerCase().includes(searchBrukere))) {
+                countBrukere += 1
+                let brukerDiv = `
+                <div>
+                    <h3>Navn: ${user.name}</h3>
+                    <p>Telefon: ${user.telephone}</p>
+                    <p>Kompani: ${user.kompani}</p>
+                    <p id="${user.name}-Peletong" value="${user.peletong}">Peletong: ${user.peletong}</p>
+                    <p id="${user.name}-Role" value="${user.role}">Role: ${user.role}</p>
+                </div>
+                 `
+                document.querySelector("#otherUsers .users").innerHTML += brukerDiv;
+                }
+            } else if (user.userType === "Leder"){
+               if((searchLedere === "" || user.name.toLowerCase().includes(searchLedere))){
+                countLedere += 1
+                let brukerDiv = `
+                <div>
+                    <h3>Navn: ${user.name}</h3>
+                    <p>Telefon: ${user.telephone}</p>
+                    <p>Kompani: ${user.kompani}</p>
+                </div>
+                 `
+                document.querySelector("#otherLeders .users").innerHTML += brukerDiv;
+                }
+            }
+        })
+        document.getElementById("totalBrukere").textContent = countBrukere
+        document.getElementById("totalLedere").textContent = countLedere
     }
     userInfo()
     getFamilyForespørsel()

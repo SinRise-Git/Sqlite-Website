@@ -30,14 +30,14 @@ body {
 
 .filters input {
     border-radius: 5px;
-    background-color: #121212;
+    background-color: #242424;
     border: 1px solid white;
     color: white;
 }
 
 .filters select {
     border-radius: 5px;
-    background-color: #121212;
+    background-color: #242424;
     border: 0px solid;
     color: white;
     margin: 5px;
@@ -141,14 +141,14 @@ th {
 
 .addKompani input, .addPeletong input {
     border-radius: 5px;
-    background-color: #121212;
+    background-color: #242424;
     border: 1px solid white;
     color: white;
 }
 
 .addKompani select, .addPeletong select {
     border-radius: 5px;
-    background-color: #121212;
+    background-color: #242424;
     border: 0px solid;
     color: white;
     margin: 5px;
@@ -156,7 +156,7 @@ th {
 
 .addKompani button, .addPeletong button {
     border-radius: 5px;
-    background-color: #121212;
+    background-color: #242424;
     border: 0px solid;
     color: white;
     padding: 10px 20px 10px 20px;
@@ -165,7 +165,7 @@ th {
 
 .top button {
     border-radius: 5px;
-    background-color: #121212;
+    background-color: #242424;
     border: 0px solid;
     color: white;
     padding: 10px 20px 10px 20px;

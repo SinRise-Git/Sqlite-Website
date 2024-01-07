@@ -350,9 +350,9 @@ async function getUsersMedlems(request, response) {
     INNER JOIN kompanier ON users.kompani = kompanier.id 
     INNER JOIN roler ON users.role = roler.id 
     INNER JOIN peletonger ON users.peletong = peletonger.id
-    WHERE (users.userType = 'Medlem' OR users.userType = 'Leder') AND users.kompani = ? AND users.userStatus = 'True';
+    WHERE (users.userType = 'Medlem' OR users.userType = 'Leder') AND users.kompani = ? AND users.userStatus = 'True' AND users.name != ?;
     `);
-    let rows = sql.all(request.session.userKompani);
+    let rows = sql.all(request.session.userKompani, request.session.userName);
     let users = rows.map(user => ({
         name: user.name,
         telephone: user.telefon,
@@ -364,7 +364,6 @@ async function getUsersMedlems(request, response) {
         userstatus: user.userStatus,
     }));
     response.send(users);
-    console.log(users)
 }
 
 async function getUsersAdmins(request, response){
@@ -510,10 +509,18 @@ async function createUsers(request, response) {
             ErrorMessage: `There is already a user with this name`
         });
     } else {
-        const hashPassword = bcrypt.hashSync(user.password, 10)
-        const UUID = uuid.v4();
-        insertUser(user.name, hashPassword, user.userType, user.role, user.kompani, user.peletong, user.telephone, UUID, user.gender, user.family);
-        response.send({ redirectUrl: `/login-page.html` });
+        if (user.name === "" || user.password  === "" || user.telephone  === ""){
+            response.send({
+                ErrorMessage: `None of the inputs can be empty`
+            });
+        } else {
+            
+            const hashPassword = bcrypt.hashSync(user.password, 10)
+            const UUID = uuid.v4();
+            insertUser(user.name, hashPassword, user.userType, user.role, user.kompani, user.peletong, user.telephone, UUID, user.gender, user.family);
+            response.send({ redirectUrl: `/login-page.html` });
+        }
+        
     }
     
 }
